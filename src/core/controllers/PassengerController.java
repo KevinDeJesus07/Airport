@@ -358,7 +358,18 @@ public class PassengerController {
             ArrayList<Flight> flights = Storage.getInstance().getPassengerFlights(Storage.getInstance().getPassenger(passengerId));
             flights.sort(Comparator.comparing(Flight::getDepartureDate));
             
-            return new Response("Flights loaded succesfully.", Status.OK, flights);
+            ArrayList<Flight> flightsCopy = new ArrayList<>();
+            if (flights != null) {
+                for (Flight flight : flights) {
+                    if (flight != null) {
+                        flightsCopy.add(flight.clone());
+                    } else {
+                        flightsCopy.add(null);
+                    }
+                }
+            }
+            
+            return new Response("Flights loaded succesfully.", Status.OK, flightsCopy);
             
         } catch (Exception ex) {
             return new Response("Unexpected error.", Status.INTERNAL_SERVER_ERROR);
@@ -367,7 +378,17 @@ public class PassengerController {
     public static Response getSortedPassengers() {
         try {
             ArrayList<Passenger> passengers = Storage.getInstance().getSortedPassengers();
-            return new Response("Passengers loaded succesfully.", Status.OK, passengers);
+            ArrayList<Passenger> passengersCopy = new ArrayList<>();
+            if (passengers != null) {
+                for (Passenger passenger : passengers) {
+                    if (passenger != null) {
+                        passengersCopy.add(passenger.clone());
+                    } else {
+                        passengersCopy.add(null);
+                    }
+                }
+            }
+            return new Response("Passengers loaded succesfully.", Status.OK, passengersCopy);
         } catch (Exception ex) {
             return new Response("Unexpected error.", Status.INTERNAL_SERVER_ERROR);
         }

@@ -111,7 +111,17 @@ public class LocationController {
     public static Response getSortedLocations() {
         try {
             ArrayList<Location> locations = Storage.getInstance().getSortedLocations();
-            return new Response("Locations loaded succesfully.", Status.OK, locations);
+            ArrayList<Location> locationsCopy = new ArrayList<>();
+            if (locations != null) {
+                for (Location location : locations) {
+                    if (location != null) {
+                        locationsCopy.add(location.clone());
+                    } else {
+                        locationsCopy.add(null);
+                    }
+                }
+            }
+            return new Response("Locations loaded succesfully.", Status.OK, locationsCopy);
         } catch (Exception ex) {
             return new Response("Unexpected error.", Status.INTERNAL_SERVER_ERROR);
         }

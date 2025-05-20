@@ -314,7 +314,17 @@ public class FlightController {
     public static Response getSortedFlights() {
         try {
             ArrayList<Flight> flights = Storage.getInstance().getSortedFlights();
-            return new Response("Flights loaded succesfully.", Status.OK, flights);
+            ArrayList<Flight> flightsCopy = new ArrayList<>();
+            if (flights != null) {
+                for (Flight flight : flights) {
+                    if (flight != null) {
+                        flightsCopy.add(flight.clone());
+                    } else {
+                        flightsCopy.add(null);
+                    }
+                }
+            }
+            return new Response("Flights loaded succesfully.", Status.OK, flightsCopy);
         } catch (Exception ex) {
             return new Response("Unexpected error.", Status.INTERNAL_SERVER_ERROR);
         }

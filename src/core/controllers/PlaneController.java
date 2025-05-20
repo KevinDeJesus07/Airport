@@ -78,7 +78,17 @@ public class PlaneController {
     public static Response getSortedPlanes() {
         try {
             ArrayList<Plane> planes = Storage.getInstance().getSortedPlanes();
-            return new Response("Planes loaded succesfully.", Status.OK, planes);
+            ArrayList<Plane> planesCopy = new ArrayList<>();
+            if (planes != null) {
+                for (Plane plane : planes) {
+                    if (plane != null) {
+                        planesCopy.add(plane.clone());
+                    } else {
+                        planesCopy.add(null);
+                    }
+                }
+            }
+            return new Response("Planes loaded succesfully.", Status.OK, planesCopy);
         } catch (Exception ex) {
             return new Response("Unexpected error.", Status.INTERNAL_SERVER_ERROR);
         }
