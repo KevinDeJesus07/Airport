@@ -5,13 +5,16 @@
         <group>
             <file>file:/C:/Users/athen/Documents/NetBeansProjects/Airport/src/main/Main.java</file>
             <file>file:/C:/Users/athen/Documents/NetBeansProjects/Airport/src/core/models/Location.java</file>
+            <file>file:/C:/Users/athen/Documents/NetBeansProjects/Airport/src/core/controllers/PlaneController.java</file>
             <file>file:/C:/Users/athen/Documents/NetBeansProjects/Airport/src/core/views/AirportFrame.java</file>
             <file>file:/C:/Users/athen/Documents/NetBeansProjects/Airport/src/core/models/storage/Storage.java</file>
             <file>file:/C:/Users/athen/Documents/NetBeansProjects/Airport/src/core/models/Passenger.java</file>
             <file>file:/C:/Users/athen/Documents/NetBeansProjects/Airport/src/core/controllers/utils/Response.java</file>
+            <file>file:/C:/Users/athen/Documents/NetBeansProjects/Airport/src/core/controllers/LocationController.java</file>
             <file>file:/C:/Users/athen/Documents/NetBeansProjects/Airport/src/core/models/Flight.java</file>
             <file>file:/C:/Users/athen/Documents/NetBeansProjects/Airport/src/core/controllers/PassengerController.java</file>
             <file>file:/C:/Users/athen/Documents/NetBeansProjects/Airport/src/core/controllers/FlightController.java</file>
+            <file>file:/C:/Users/athen/Documents/NetBeansProjects/Airport/src/core/models/Plane.java</file>
         </group>
     </open-files>
 </project-private>

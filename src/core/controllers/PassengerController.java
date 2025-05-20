@@ -11,6 +11,7 @@ import core.models.Passenger;
 import core.models.storage.Storage;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 /**
  *
@@ -355,6 +356,7 @@ public class PassengerController {
             }
             
             ArrayList<Flight> flights = Storage.getInstance().getPassengerFlights(Storage.getInstance().getPassenger(passengerId));
+            flights.sort(Comparator.comparing(Flight::getDepartureDate));
             
             return new Response("Flights loaded succesfully.", Status.OK, flights);
             

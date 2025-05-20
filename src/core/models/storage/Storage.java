@@ -162,21 +162,21 @@ public class Storage {
         sortedLocations.sort(Comparator.comparing(loc -> Integer.valueOf(loc.getId())));
         return sortedLocations;
     }
-    
+
     public ArrayList<Passenger> getSortedPassengers() {
-        ArrayList<Passenger> sortedPassengers = new ArrayList<>(passengers); 
-        sortedPassengers.sort(Comparator.comparingLong(Passenger::getId)); 
+        ArrayList<Passenger> sortedPassengers = new ArrayList<>(passengers);
+        sortedPassengers.sort(Comparator.comparingLong(Passenger::getId));
         return sortedPassengers;
     }
-    
+
     public ArrayList<Flight> getSortedFlights() {
-        ArrayList<Flight> sortedFlights = new ArrayList<>(flights); 
-        sortedFlights.sort(Comparator.comparing(loc -> Integer.valueOf(loc.getId())));
+        ArrayList<Flight> sortedFlights = new ArrayList<>(flights);
+        sortedFlights.sort(Comparator.comparing(Flight::getDepartureDate));
         return sortedFlights;
     }
-    
+
     public ArrayList<Plane> getSortedPlanes() {
-        ArrayList<Plane> sortedPlanes = new ArrayList<>(planes); 
+        ArrayList<Plane> sortedPlanes = new ArrayList<>(planes);
         sortedPlanes.sort(Comparator.comparing(loc -> Integer.valueOf(loc.getId())));
         return sortedPlanes;
     }
