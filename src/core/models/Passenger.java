@@ -33,6 +33,30 @@ public class Passenger {
         this.country = country;
         this.flights = new ArrayList<>();
     }
+    
+    public Passenger(Passenger passenger) {
+        this.id = passenger.id;
+        this.firstname = passenger.firstname;
+        this.lastname = passenger.lastname;
+        this.birthDate = passenger.birthDate;
+        this.countryPhoneCode = passenger.countryPhoneCode;
+        this.phone = passenger.phone;
+        this.country = passenger.country;
+        this.flights = new ArrayList<>();
+        if (passenger.flights != null) {
+            for (Flight flight : passenger.flights) {
+                if (flight != null) {
+                    this.flights.add(flight.clone());
+                } else {
+                    this.flights.add(null);
+                }
+            }
+        }
+    }
+    
+    public Passenger clone() {
+        return new Passenger(this);
+    }
 
     public void addFlight(Flight flight) {
         this.flights.add(flight);

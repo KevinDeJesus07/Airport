@@ -25,6 +25,19 @@ public class Location {
         this.airportLatitude = airportLatitude;
         this.airportLongitude = airportLongitude;
     }
+    
+    public Location(Location location) {
+        this.airportId = location.airportId;
+        this.airportName = location.airportName;
+        this.airportCity = location.airportCity;
+        this.airportCountry = location.airportCountry;
+        this.airportLatitude = location.airportLatitude;
+        this.airportLongitude = location.airportLongitude;
+    }
+    
+    public Location clone() {
+        return new Location(this);
+    } 
 
     public String getAirportId() {
         return airportId;

@@ -27,6 +27,28 @@ public class Plane {
         this.airline = airline;
         this.flights = new ArrayList<>();
     }
+    
+    public Plane(Plane plane) {
+        this.id = plane.id;
+        this.brand = plane.brand;
+        this.model = plane.model;
+        this.maxCapacity = plane.maxCapacity;
+        this.airline = plane.airline;
+        this.flights = new ArrayList<>();
+        if (plane.flights != null) {
+            for (Flight flight : plane.flights) {
+                if (flight != null) {
+                    this.flights.add(flight.clone());
+                } else {
+                    this.flights.add(null);
+                }
+            }
+        }
+    }
+    
+    public Plane clone() {
+        return new Plane(this);
+    }
 
     public void addFlight(Flight flight) {
         this.flights.add(flight);

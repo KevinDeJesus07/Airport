@@ -12,6 +12,7 @@ import java.util.ArrayList;
  * @author Kevin
  */
 public class Flight {
+
     private final String id;
     private ArrayList<Passenger> passengers;
     private Plane plane;
@@ -23,7 +24,6 @@ public class Flight {
     private int minutesDurationArrival;
     private int hoursDurationScale;
     private int minutesDurationScale;
-    
 
     public Flight(String id, Plane plane, Location departureLocation, Location arrivalLocation, LocalDateTime departureDate, int hoursDurationArrival, int minutesDurationArrival) {
         this.id = id;
@@ -34,7 +34,7 @@ public class Flight {
         this.departureDate = departureDate;
         this.hoursDurationArrival = hoursDurationArrival;
         this.minutesDurationArrival = minutesDurationArrival;
-        
+
         this.plane.addFlight(this);
     }
 
@@ -50,14 +50,40 @@ public class Flight {
         this.minutesDurationArrival = minutesDurationArrival;
         this.hoursDurationScale = hoursDurationScale;
         this.minutesDurationScale = minutesDurationScale;
-        
+
         this.plane.addFlight(this);
+    }
+
+    public Flight(Flight flight) {
+        this.id = flight.id;
+        this.passengers = new ArrayList<>();
+        if (flight.passengers != null) {
+            for (Passenger passanger : flight.passengers) {
+                if (passanger != null) {
+                    this.passengers.add(passanger.clone());
+                } else {
+                    this.passengers.add(null);
+                }
+            }
+        }
+        this.plane = (flight.plane != null) ? flight.plane.clone() : null;
+        this.departureLocation = (flight.departureLocation != null) ? flight.departureLocation.clone() : null;
+        this.arrivalLocation = (flight.arrivalLocation != null) ? flight.arrivalLocation.clone() : null;
+        this.departureDate = flight.departureDate;
+        this.hoursDurationArrival = flight.hoursDurationArrival;
+        this.minutesDurationArrival = flight.minutesDurationArrival; 
+        this.hoursDurationScale = flight.hoursDurationScale;
+        this.minutesDurationScale = flight.minutesDurationScale;
+    }
+
+    public Flight clone() {
+        return new Flight(this);
     }
     
     public void addPassenger(Passenger passenger) {
         this.passengers.add(passenger);
     }
-    
+
     public String getId() {
         return id;
     }
@@ -101,15 +127,15 @@ public class Flight {
     public void setDepartureDate(LocalDateTime departureDate) {
         this.departureDate = departureDate;
     }
-    
+
     public LocalDateTime calculateArrivalDate() {
         return departureDate.plusHours(hoursDurationScale).plusHours(hoursDurationArrival).plusMinutes(minutesDurationScale).plusMinutes(minutesDurationArrival);
     }
-    
+
     public void delay(int hours, int minutes) {
         this.departureDate = this.departureDate.plusHours(hours).plusMinutes(minutes);
     }
-    
+
     public int getNumPassengers() {
         return passengers.size();
     }
