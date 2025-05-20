@@ -8,6 +8,7 @@ import core.controllers.utils.Response;
 import core.controllers.utils.Status;
 import core.models.Plane;
 import core.models.storage.Storage;
+import java.util.ArrayList;
 
 /**
  *
@@ -69,6 +70,15 @@ public class PlaneController {
             
             return new Response("Plane created succesfully.", Status.CREATED);
             
+        } catch (Exception ex) {
+            return new Response("Unexpected error.", Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    public static Response getSortedPlanes() {
+        try {
+            ArrayList<Plane> planes = Storage.getInstance().getSortedPlanes();
+            return new Response("Planes loaded succesfully.", Status.OK, planes);
         } catch (Exception ex) {
             return new Response("Unexpected error.", Status.INTERNAL_SERVER_ERROR);
         }

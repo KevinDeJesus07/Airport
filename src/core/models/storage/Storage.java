@@ -9,31 +9,34 @@ import core.models.Location;
 import core.models.Passenger;
 import core.models.Plane;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  *
  * @author Kevin
  */
 public class Storage {
+
     private static Storage instance;
     private ArrayList<Flight> flights;
     private ArrayList<Location> locations;
     private ArrayList<Plane> planes;
     private ArrayList<Passenger> passengers;
-    
+
     private Storage() {
         this.flights = new ArrayList<>();
         this.locations = new ArrayList<>();
         this.planes = new ArrayList<>();
     }
-    
+
     public static Storage getInstance() {
         if (instance == null) {
             instance = new Storage();
         }
         return instance;
     }
-    
+
     public Flight getFlight(String id) {
         for (Flight flight : this.flights) {
             if (flight.getId() == id) {
@@ -42,7 +45,7 @@ public class Storage {
         }
         return null;
     }
-    
+
     public boolean addFlight(Flight flight) {
         for (Flight f : this.flights) {
             if (f.getId() == flight.getId()) {
@@ -52,7 +55,7 @@ public class Storage {
         this.flights.add(flight);
         return true;
     }
-    
+
     public boolean delFlight(String id) {
         for (Flight flight : this.flights) {
             if (flight.getId() == id) {
@@ -62,7 +65,7 @@ public class Storage {
         }
         return false;
     }
-    
+
     public Location getLocation(String id) {
         for (Location location : this.locations) {
             if (location.getAirportId() == id) {
@@ -71,7 +74,7 @@ public class Storage {
         }
         return null;
     }
-    
+
     public Plane getPlane(String id) {
         for (Plane plane : this.planes) {
             if (plane.getId() == id) {
@@ -80,8 +83,8 @@ public class Storage {
         }
         return null;
     }
-    
-    public Passenger getPassenger(String id)  throws NumberFormatException {
+
+    public Passenger getPassenger(String id) throws NumberFormatException {
         long idLong = Long.parseLong(id);
         for (Passenger passenger : this.passengers) {
             if (passenger.getId() == idLong) {
@@ -90,7 +93,7 @@ public class Storage {
         }
         return null;
     }
-    
+
     public boolean addPassenger(Passenger passenger) {
         for (Passenger p : this.passengers) {
             if (p.getId() == passenger.getId()) {
@@ -100,7 +103,7 @@ public class Storage {
         passengers.add(passenger);
         return true;
     }
-    
+
     public boolean updatePassenger(Passenger passenger) {
         Passenger updatePassenger = null;
         for (Passenger p : passengers) {
@@ -120,7 +123,7 @@ public class Storage {
         updatePassenger.setCountry(passenger.getCountry());
         return true;
     }
-    
+
     public ArrayList<Flight> getPassengerFlights(Passenger passenger) {
         for (Passenger p : passengers) {
             if (p.getId() == passenger.getId()) {
@@ -129,7 +132,7 @@ public class Storage {
         }
         return new ArrayList<>();
     }
-    
+
     public boolean addPlane(Plane plane) {
         for (Plane p : planes) {
             if (p.getId() == plane.getId()) {
@@ -139,7 +142,7 @@ public class Storage {
         planes.add(plane);
         return true;
     }
-    
+
     public boolean addLocation(Location location) {
         for (Location l : locations) {
             if (l.getId() == location.getId()) {
@@ -148,5 +151,33 @@ public class Storage {
         }
         locations.add(location);
         return true;
+    }
+
+    public ArrayList<Location> getLocations() {
+        return locations;
+    }
+
+    public ArrayList<Location> getSortedLocations() {
+        ArrayList<Location> sortedLocations = new ArrayList<>(locations);
+        sortedLocations.sort(Comparator.comparing(loc -> Integer.valueOf(loc.getId())));
+        return sortedLocations;
+    }
+    
+    public ArrayList<Passenger> getSortedPassengers() {
+        ArrayList<Passenger> sortedPassengers = new ArrayList<>(passengers); 
+        sortedPassengers.sort(Comparator.comparingLong(Passenger::getId)); 
+        return sortedPassengers;
+    }
+    
+    public ArrayList<Flight> getSortedFlights() {
+        ArrayList<Flight> sortedFlights = new ArrayList<>(flights); 
+        sortedFlights.sort(Comparator.comparing(loc -> Integer.valueOf(loc.getId())));
+        return sortedFlights;
+    }
+    
+    public ArrayList<Plane> getSortedPlanes() {
+        ArrayList<Plane> sortedPlanes = new ArrayList<>(planes); 
+        sortedPlanes.sort(Comparator.comparing(loc -> Integer.valueOf(loc.getId())));
+        return sortedPlanes;
     }
 }

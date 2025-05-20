@@ -9,6 +9,7 @@ import core.controllers.utils.Status;
 import core.models.Flight;
 import core.models.storage.Storage;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 /**
  *
@@ -305,6 +306,15 @@ public class FlightController {
             
             Storage.getInstance().getFlight(flightId).delay(hoursInt, minutesInt);
             return new Response("Delay apply succesfully.", Status.OK);
+        } catch (Exception ex) {
+            return new Response("Unexpected error.", Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    public static Response getSortedFlights() {
+        try {
+            ArrayList<Flight> flights = Storage.getInstance().getSortedFlights();
+            return new Response("Flights loaded succesfully.", Status.OK, flights);
         } catch (Exception ex) {
             return new Response("Unexpected error.", Status.INTERNAL_SERVER_ERROR);
         }

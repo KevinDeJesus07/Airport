@@ -9,6 +9,9 @@ import core.controllers.utils.Status;
 import core.models.Location;
 import core.models.storage.Storage;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -105,4 +108,12 @@ public class LocationController {
         }
     }
 
+    public static Response getSortedLocations() {
+        try {
+            ArrayList<Location> locations = Storage.getInstance().getSortedLocations();
+            return new Response("Locations loaded succesfully.", Status.OK, locations);
+        } catch (Exception ex) {
+            return new Response("Unexpected error.", Status.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

@@ -362,4 +362,12 @@ public class PassengerController {
             return new Response("Unexpected error.", Status.INTERNAL_SERVER_ERROR);
         }
     }
+    public static Response getSortedPassengers() {
+        try {
+            ArrayList<Passenger> passengers = Storage.getInstance().getSortedPassengers();
+            return new Response("Passengers loaded succesfully.", Status.OK, passengers);
+        } catch (Exception ex) {
+            return new Response("Unexpected error.", Status.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
