@@ -830,6 +830,11 @@ public class AirportFrame extends javax.swing.JFrame {
         idUpdateTextField.setEditable(false);
         idUpdateTextField.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         idUpdateTextField.setEnabled(false);
+        idUpdateTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                idUpdateTextFieldActionPerformed(evt);
+            }
+        });
 
         jLabel37.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jLabel37.setText("First Name:");
@@ -1648,6 +1653,7 @@ public class AirportFrame extends javax.swing.JFrame {
     private void updatePassengerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updatePassengerButtonActionPerformed
 
         String id = idUpdateTextField.getText();
+        String idUser = userSelect.getItemAt(userSelect.getSelectedIndex());
         String firstname = firstnameUpdateTextField.getText();
         String lastname = lastnameUpdateTextField.getText();
         String year = yearUpdateTextField.getText();
@@ -1658,7 +1664,7 @@ public class AirportFrame extends javax.swing.JFrame {
         String country = countryUpdateTextField.getText();
 
         Response response = PassengerController.updatePassenger(
-                id, firstname, lastname, year, month, day, phoneCode, phone, country
+                idUser, firstname, lastname, year, month, day, phoneCode, phone, country
         );
 
         if (response.getStatus() >= 500) {
@@ -1901,6 +1907,10 @@ public class AirportFrame extends javax.swing.JFrame {
     private void planeFlightComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_planeFlightComboBoxActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_planeFlightComboBoxActionPerformed
+
+    private void idUpdateTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_idUpdateTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_idUpdateTextFieldActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTabbedPane TabbedPane;
