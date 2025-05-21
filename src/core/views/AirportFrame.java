@@ -1735,7 +1735,7 @@ public class AirportFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_delayButtonActionPerformed
 
     private void refreshMyFlightsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshMyFlightsButtonActionPerformed
-        
+
         String passengerId = userSelect.getItemAt(userSelect.getSelectedIndex());
 
         Response response = PassengerController.showMyFlights(passengerId);
@@ -1761,7 +1761,7 @@ public class AirportFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_refreshMyFlightsButtonActionPerformed
 
     private void refreshAllPassengersButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshAllPassengersButtonActionPerformed
-        
+
         Response response = PassengerController.getSortedPassengers();
 
         if (response.getStatus() >= 500) {
@@ -1788,11 +1788,30 @@ public class AirportFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_refreshAllPassengersButtonActionPerformed
 
     private void refreshAllFlightsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshAllFlightsButtonActionPerformed
-        // TODO add your handling code here:
-        DefaultTableModel model = (DefaultTableModel) allFlightsTable.getModel();
-        model.setRowCount(0);
-        for (Flight flight : this.flights) {
-            model.addRow(new Object[]{flight.getId(), flight.getDepartureLocation().getAirportId(), flight.getArrivalLocation().getAirportId(), (flight.getScaleLocation() == null ? "-" : flight.getScaleLocation().getAirportId()), flight.getDepartureDate(), flight.calculateArrivalDate(), flight.getPlane().getId(), flight.getNumPassengers()});
+
+        Response response = FlightController.getSortedFlights();
+
+        if (response.getStatus() >= 500) {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.ERROR_MESSAGE);
+        } else if (response.getStatus() >= 400) {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.WARNING_MESSAGE);
+        } else {
+            ArrayList<Flight> flights = (ArrayList<Flight>) response.getObject();
+
+            DefaultTableModel model = (DefaultTableModel) allFlightsTable.getModel();
+            model.setRowCount(0);
+            for (Flight flight : flights) {
+                model.addRow(new Object[]{
+                    flight.getId(),
+                    flight.getDepartureLocation().getAirportId(),
+                    flight.getArrivalLocation().getAirportId(),
+                    (flight.getScaleLocation() == null ? "-" : flight.getScaleLocation().getAirportId()),
+                    flight.getDepartureDate(),
+                    flight.calculateArrivalDate(),
+                    flight.getPlane().getId(),
+                    flight.getNumPassengers()
+                });
+            }
         }
     }//GEN-LAST:event_refreshAllFlightsButtonActionPerformed
 
