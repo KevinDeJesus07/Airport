@@ -1735,6 +1735,7 @@ public class AirportFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_delayButtonActionPerformed
 
     private void refreshMyFlightsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshMyFlightsButtonActionPerformed
+        
         String passengerId = userSelect.getItemAt(userSelect.getSelectedIndex());
 
         Response response = PassengerController.showMyFlights(passengerId);
@@ -1744,7 +1745,7 @@ public class AirportFrame extends javax.swing.JFrame {
         } else if (response.getStatus() >= 400) {
             JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.WARNING_MESSAGE);
         } else {
-         
+
             ArrayList<Flight> flights = (ArrayList<Flight>) response.getObject();
 
             DefaultTableModel model = (DefaultTableModel) myFlightsTable.getModel();
@@ -1760,11 +1761,29 @@ public class AirportFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_refreshMyFlightsButtonActionPerformed
 
     private void refreshAllPassengersButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshAllPassengersButtonActionPerformed
-        // TODO add your handling code here:
-        DefaultTableModel model = (DefaultTableModel) allPassengersTable.getModel();
-        model.setRowCount(0);
-        for (Passenger passenger : this.passengers) {
-            model.addRow(new Object[]{passenger.getId(), passenger.getFullname(), passenger.getBirthDate(), passenger.calculateAge(), passenger.generateFullPhone(), passenger.getCountry(), passenger.getNumFlights()});
+        
+        Response response = PassengerController.getSortedPassengers();
+
+        if (response.getStatus() >= 500) {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.ERROR_MESSAGE);
+        } else if (response.getStatus() >= 400) {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.WARNING_MESSAGE);
+        } else {
+            ArrayList<Passenger> passengers = (ArrayList<Passenger>) response.getObject();
+
+            DefaultTableModel model = (DefaultTableModel) allPassengersTable.getModel();
+            model.setRowCount(0);
+            for (Passenger passenger : passengers) {
+                model.addRow(new Object[]{
+                    passenger.getId(),
+                    passenger.getFullname(),
+                    passenger.getBirthDate(),
+                    passenger.calculateAge(),
+                    passenger.generateFullPhone(),
+                    passenger.getCountry(),
+                    passenger.getNumFlights()
+                });
+            }
         }
     }//GEN-LAST:event_refreshAllPassengersButtonActionPerformed
 
