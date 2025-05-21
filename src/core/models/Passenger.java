@@ -42,6 +42,7 @@ public class Passenger {
         this.countryPhoneCode = passenger.countryPhoneCode;
         this.phone = passenger.phone;
         this.country = passenger.country;
+        
         this.flights = new ArrayList<>();
         if (passenger.flights != null) {
             for (Flight flight : passenger.flights) {

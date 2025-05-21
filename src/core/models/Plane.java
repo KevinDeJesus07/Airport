@@ -38,7 +38,7 @@ public class Plane {
         if (plane.flights != null) {
             for (Flight flight : plane.flights) {
                 if (flight != null) {
-                    this.flights.add(flight.clone());
+                    this.flights.add(flight);
                 } else {
                     this.flights.add(null);
                 }

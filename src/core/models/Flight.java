@@ -35,7 +35,9 @@ public class Flight {
         this.hoursDurationArrival = hoursDurationArrival;
         this.minutesDurationArrival = minutesDurationArrival;
 
-        this.plane.addFlight(this);
+        if (this.plane != null) {
+            this.plane.addFlight(this);
+        }
     }
 
     public Flight(String id, Plane plane, Location departureLocation, Location scaleLocation, Location arrivalLocation, LocalDateTime departureDate, int hoursDurationArrival, int minutesDurationArrival, int hoursDurationScale, int minutesDurationScale) {
@@ -51,7 +53,9 @@ public class Flight {
         this.hoursDurationScale = hoursDurationScale;
         this.minutesDurationScale = minutesDurationScale;
 
-        this.plane.addFlight(this);
+        if (this.plane != null) {
+            this.plane.addFlight(this);
+        }
     }
 
     public Flight(Flight flight) {
@@ -60,7 +64,7 @@ public class Flight {
         if (flight.passengers != null) {
             for (Passenger passanger : flight.passengers) {
                 if (passanger != null) {
-                    this.passengers.add(passanger.clone());
+                    this.passengers.add(passanger);
                 } else {
                     this.passengers.add(null);
                 }
@@ -69,9 +73,10 @@ public class Flight {
         this.plane = (flight.plane != null) ? flight.plane.clone() : null;
         this.departureLocation = (flight.departureLocation != null) ? flight.departureLocation.clone() : null;
         this.arrivalLocation = (flight.arrivalLocation != null) ? flight.arrivalLocation.clone() : null;
+        this.scaleLocation = (flight.scaleLocation != null) ? flight.scaleLocation.clone() : null;
         this.departureDate = flight.departureDate;
         this.hoursDurationArrival = flight.hoursDurationArrival;
-        this.minutesDurationArrival = flight.minutesDurationArrival; 
+        this.minutesDurationArrival = flight.minutesDurationArrival;
         this.hoursDurationScale = flight.hoursDurationScale;
         this.minutesDurationScale = flight.minutesDurationScale;
     }
@@ -79,7 +84,7 @@ public class Flight {
     public Flight clone() {
         return new Flight(this);
     }
-    
+
     public void addPassenger(Passenger passenger) {
         this.passengers.add(passenger);
     }
