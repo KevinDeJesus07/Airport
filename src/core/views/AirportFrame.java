@@ -1825,11 +1825,28 @@ public class AirportFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_refreshAllPlanesButtonActionPerformed
 
     private void refreshAllLocationsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshAllLocationsButtonActionPerformed
-        // TODO add your handling code here:
-        DefaultTableModel model = (DefaultTableModel) allLocationsTable.getModel();
-        model.setRowCount(0);
-        for (Location location : this.locations) {
-            model.addRow(new Object[]{location.getAirportId(), location.getAirportName(), location.getAirportCity(), location.getAirportCountry()});
+
+        Response response = PlaneController.getSortedPlanes();
+
+        if (response.getStatus() >= 500) {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.ERROR_MESSAGE);
+        } else if (response.getStatus() >= 400) {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.WARNING_MESSAGE);
+        } else {
+            ArrayList<Plane> planes = (ArrayList<Plane>) response.getObject();
+
+            DefaultTableModel model = (DefaultTableModel) allPlanesTable.getModel();
+            model.setRowCount(0);
+            for (Plane plane : planes) {
+                model.addRow(new Object[]{
+                    plane.getId(),
+                    plane.getBrand(),
+                    plane.getModel(),
+                    plane.getMaxCapacity(),
+                    plane.getAirline(),
+                    plane.getNumFlights()
+                });
+            }
         }
     }//GEN-LAST:event_refreshAllLocationsButtonActionPerformed
 
