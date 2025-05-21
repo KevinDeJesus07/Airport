@@ -14,6 +14,8 @@ import core.controllers.LocationController;
 import core.controllers.PassengerController;
 import core.controllers.PlaneController;
 import core.controllers.utils.Response;
+import core.controllers.utils.Status;
+import core.models.storage.Storage;
 import java.awt.Color;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,12 +23,15 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
+import core.utils.events.EventListeners;
+import core.utils.events.DataType;
+import javax.swing.SwingUtilities;
 
 /**
  *
  * @author edangulo
  */
-public class AirportFrame extends javax.swing.JFrame {
+public class AirportFrame extends javax.swing.JFrame implements EventListeners {
 
     /**
      * Creates new form AirportFrame
@@ -40,6 +45,12 @@ public class AirportFrame extends javax.swing.JFrame {
     public AirportFrame() {
         initComponents();
 
+        Storage storage = Storage.getInstance();
+        storage.subscribe(DataType.PASSENGER, this);
+        storage.subscribe(DataType.LOCATION, this);
+        storage.subscribe(DataType.PLANE, this);
+        storage.subscribe(DataType.FLIGHT, this);
+        
         this.passengers = new ArrayList<>();
         this.planes = new ArrayList<>();
         this.locations = new ArrayList<>();
@@ -53,6 +64,56 @@ public class AirportFrame extends javax.swing.JFrame {
         this.generateHours();
         this.generateMinutes();
         this.blockPanels();
+    }
+    
+    @Override
+    public void update(DataType type) {
+        SwingUtilities.invokeLater(() -> {
+            if (type == DataType.PASSENGER || type == DataType.ALL) {
+                populateAllPassengerComboBoxes();
+                refreshPassengerTable();
+            }
+            if (type == DataType.LOCATION || type == DataType.ALL) {
+                populationAllLocationComboBoxes();
+                refreshLocationTable();
+            }
+            if (type == DataType.PLANE || type == DataType.PLANE) {
+                populateAllPlaneComboBoxes();
+                refreshPlaneTable();
+            }
+            if (type == DataType.FLIGHT || type == DataType.FLIGHT) {
+                
+            }
+        });
+    }
+    
+    private void populateAllPassengerComboBoxes() {
+        Response response = PassengerController.getSortedPassengers();
+        
+        if (userSelect != null && response.getStatus() == Status.OK) {
+            userSelect.removeAllItems();
+        }
+        
+    }
+    
+    private void populationAllLocationComboBoxes() {
+        
+    }
+    
+    private void populateAllPlaneComboBoxes() {
+        
+    }
+    
+    private void refreshPassengerTable() {
+        
+    }
+    
+    private void refreshLocationTable() {
+        
+    }
+    
+    private void refreshPlaneTable() {
+        
     }
 
     private void blockPanels() {
