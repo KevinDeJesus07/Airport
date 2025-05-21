@@ -9,6 +9,7 @@ import core.models.Location;
 import core.models.Passenger;
 import core.models.Plane;
 import com.formdev.flatlaf.FlatDarkLaf;
+import core.controllers.FlightController;
 import core.controllers.LocationController;
 import core.controllers.PassengerController;
 import core.controllers.PlaneController;
@@ -1571,53 +1572,77 @@ public class AirportFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_createLocationButtonActionPerformed
 
     private void createFlightButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createFlightButtonActionPerformed
-        // TODO add your handling code here:
+
         String id = idFlightTextField.getText();
         String planeId = planeFlightComboBox.getItemAt(planeFlightComboBox.getSelectedIndex());
         String departureLocationId = departureLocationFlightComboBox.getItemAt(departureLocationFlightComboBox.getSelectedIndex());
         String arrivalLocationId = arrivalLocationFlightComboBox.getItemAt(arrivalLocationFlightComboBox.getSelectedIndex());
         String scaleLocationId = scaleLocationFlightComboBox.getItemAt(scaleLocationFlightComboBox.getSelectedIndex());
-        int year = Integer.parseInt(departureYearFlightTextField.getText());
-        int month = Integer.parseInt(departureMonthFlightComboBox.getItemAt(departureMonthFlightComboBox.getSelectedIndex()));
-        int day = Integer.parseInt(departureDayFlightComboBox.getItemAt(departureDayFlightComboBox.getSelectedIndex()));
-        int hour = Integer.parseInt(departureHourFlightComboBox.getItemAt(departureHourFlightComboBox.getSelectedIndex()));
-        int minutes = Integer.parseInt(departureMinutesFlightComboBox.getItemAt(departureMinutesFlightComboBox.getSelectedIndex()));
-        int hoursDurationsArrival = Integer.parseInt(arrivalHourFlightComboBOx.getItemAt(arrivalHourFlightComboBOx.getSelectedIndex()));
-        int minutesDurationsArrival = Integer.parseInt(arrivalMinutesFlightComboBox.getItemAt(arrivalMinutesFlightComboBox.getSelectedIndex()));
-        int hoursDurationsScale = Integer.parseInt(scaleHourFlightComboBox.getItemAt(scaleHourFlightComboBox.getSelectedIndex()));
-        int minutesDurationsScale = Integer.parseInt(scaleMinutesFlightComboBox.getItemAt(scaleMinutesFlightComboBox.getSelectedIndex()));
+        String year = departureYearFlightTextField.getText();
+        String month = departureMonthFlightComboBox.getItemAt(departureMonthFlightComboBox.getSelectedIndex());
+        String day = departureDayFlightComboBox.getItemAt(departureDayFlightComboBox.getSelectedIndex());
+        String hour = departureHourFlightComboBox.getItemAt(departureHourFlightComboBox.getSelectedIndex());
+        String minutes = departureMinutesFlightComboBox.getItemAt(departureMinutesFlightComboBox.getSelectedIndex());
+        String hoursDurationsArrival = arrivalHourFlightComboBOx.getItemAt(arrivalHourFlightComboBOx.getSelectedIndex());
+        String minutesDurationsArrival = arrivalMinutesFlightComboBox.getItemAt(arrivalMinutesFlightComboBox.getSelectedIndex());
+        String hoursDurationsScale = scaleHourFlightComboBox.getItemAt(scaleHourFlightComboBox.getSelectedIndex());
+        String minutesDurationsScale = scaleMinutesFlightComboBox.getItemAt(scaleMinutesFlightComboBox.getSelectedIndex());
 
-        LocalDateTime departureDate = LocalDateTime.of(year, month, day, hour, minutes);
+        Response response = FlightController.createFlight(
+                id, planeId, departureLocationId, arrivalLocationId, scaleLocationId, year,
+                month, day, hour, minutes, hoursDurationsArrival, minutesDurationsArrival,
+                hoursDurationsScale, minutesDurationsScale
+        );
 
-        Plane plane = null;
-        for (Plane p : this.planes) {
-            if (planeId.equals(p.getId())) {
-                plane = p;
-            }
-        }
-
-        Location departure = null;
-        Location arrival = null;
-        Location scale = null;
-        for (Location location : this.locations) {
-            if (departureLocationId.equals(location.getAirportId())) {
-                departure = location;
-            }
-            if (arrivalLocationId.equals(location.getAirportId())) {
-                arrival = location;
-            }
-            if (scaleLocationId.equals(location.getAirportId())) {
-                scale = location;
-            }
-        }
-
-        if (scale == null) {
-            this.flights.add(new Flight(id, plane, departure, arrival, departureDate, hoursDurationsArrival, minutesDurationsArrival));
+        if (response.getStatus() >= 500) {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.ERROR_MESSAGE);
+        } else if (response.getStatus() >= 400) {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.WARNING_MESSAGE);
         } else {
-            this.flights.add(new Flight(id, plane, departure, scale, arrival, departureDate, hoursDurationsArrival, minutesDurationsArrival, hoursDurationsScale, minutesDurationsScale));
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Response Message", JOptionPane.INFORMATION_MESSAGE);
+
+            idFlightTextField.setText("");
+            if (planeFlightComboBox.getItemCount() > 0) {
+                planeFlightComboBox.setSelectedIndex(0);
+            }
+            if (departureLocationFlightComboBox.getItemCount() > 0) {
+                departureLocationFlightComboBox.setSelectedIndex(0);
+            }
+            if (arrivalLocationFlightComboBox.getItemCount() > 0) {
+                arrivalLocationFlightComboBox.setSelectedIndex(0);
+            }
+            if (scaleLocationFlightComboBox.getItemCount() > 0) {
+                scaleLocationFlightComboBox.setSelectedIndex(0);
+            }
+            departureYearFlightTextField.setText("");
+            if (departureMonthFlightComboBox.getItemCount() > 0) {
+                departureMonthFlightComboBox.setSelectedIndex(0);
+            }
+            if (departureDayFlightComboBox.getItemCount() > 0) {
+                departureDayFlightComboBox.setSelectedIndex(0);
+            }
+            if (departureHourFlightComboBox.getItemCount() > 0) {
+                departureHourFlightComboBox.setSelectedIndex(0);
+            }
+            if (departureMinutesFlightComboBox.getItemCount() > 0) {
+                departureMinutesFlightComboBox.setSelectedIndex(0);
+            }
+            if (arrivalHourFlightComboBOx.getItemCount() > 0) {
+                arrivalHourFlightComboBOx.setSelectedIndex(0);
+            }
+            if (arrivalMinutesFlightComboBox.getItemCount() > 0) {
+                arrivalMinutesFlightComboBox.setSelectedIndex(0);
+            }
+            if (scaleHourFlightComboBox.getItemCount() > 0) {
+                scaleHourFlightComboBox.setSelectedIndex(0);
+            }
+            if (scaleMinutesFlightComboBox.getItemCount() > 0) {
+                scaleMinutesFlightComboBox.setSelectedIndex(0);
+            }
+
+            this.flightAddComboBox.addItem(id);
         }
 
-        this.flightAddComboBox.addItem(id);
     }//GEN-LAST:event_createFlightButtonActionPerformed
 
     private void updatePassengerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updatePassengerButtonActionPerformed
