@@ -9,6 +9,7 @@ import core.models.Location;
 import core.models.Passenger;
 import core.models.Plane;
 import com.formdev.flatlaf.FlatDarkLaf;
+import core.controllers.LocationController;
 import core.controllers.PassengerController;
 import core.controllers.PlaneController;
 import core.controllers.utils.Response;
@@ -1441,7 +1442,7 @@ public class AirportFrame extends javax.swing.JFrame {
 
         }
         for (int i = 1; i < TabbedPane.getTabCount(); i++) {
-                TabbedPane.setEnabledAt(i, true);
+            TabbedPane.setEnabledAt(i, true);
         }
         TabbedPane.setEnabledAt(5, false);
         TabbedPane.setEnabledAt(6, false);
@@ -1474,18 +1475,18 @@ public class AirportFrame extends javax.swing.JFrame {
         String phoneCode = phoneCodePassengerTextField.getText();
         String phone = phonePassengerTextField.getText();
         String country = countryPassengerTextField.getText();
-        
+
         Response response = PassengerController.createPassenger(
-                id, firsname, lastname, year, month, day, phoneCode, 
+                id, firsname, lastname, year, month, day, phoneCode,
                 phone, country);
-        
+
         if (response.getStatus() >= 500) {
             JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.ERROR_MESSAGE);
         } else if (response.getStatus() >= 400) {
             JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.WARNING_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(null, response.getMessage(), "Response Message", JOptionPane.INFORMATION_MESSAGE);
-            
+
             idPassengerTextField.setText("");
             firstnamePassengerTextField.setText("");
             lastnamePassengerTextField.setText("");
@@ -1499,56 +1500,74 @@ public class AirportFrame extends javax.swing.JFrame {
             phoneCodePassengerTextField.setText("");
             phonePassengerTextField.setText("");
             countryPassengerTextField.setText("");
-            
+
             this.userSelect.addItem(id);
         }
-        
+
     }//GEN-LAST:event_createPassengerButtonActionPerformed
 
     private void createPlaneButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createPlaneButtonActionPerformed
-        
+
         String id = idPlaneTextField.getText();
         String brand = brandPlaneTextField.getText();
         String model = modelPlaneTextField.getText();
         String maxCapacity = maxCapacityPlaneTextField.getText();
         String airline = airlinePlaneTextField.getText();
-        
+
         Response response = PlaneController.createPlane(
-            id, brand, model, maxCapacity, airline
+                id, brand, model, maxCapacity, airline
         );
-        
+
         if (response.getStatus() >= 500) {
             JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.ERROR_MESSAGE);
         } else if (response.getStatus() >= 400) {
             JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.WARNING_MESSAGE);
         } else {
             JOptionPane.showMessageDialog(null, response.getMessage(), "Response Message", JOptionPane.INFORMATION_MESSAGE);
-            
+
             idPlaneTextField.setText("");
             brandPlaneTextField.setText("");
             modelPlaneTextField.setText("");
             maxCapacityPlaneTextField.setText("");
             airlinePlaneTextField.setText("");
-            
+
             this.planeFlightComboBox.addItem(id);
         }
-        
+
     }//GEN-LAST:event_createPlaneButtonActionPerformed
 
     private void createLocationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createLocationButtonActionPerformed
-        // TODO add your handling code here:
+
         String id = idLocationTextField.getText();
         String name = nameLocationTextField.getText();
         String city = cityLocationTextField.getText();
         String country = countryLocationTextField.getText();
-        double latitude = Double.parseDouble(latitudeLocationTextField.getText());
-        double longitude = Double.parseDouble(longitudeLocationTextField.getText());
+        String latitude = latitudeLocationTextField.getText();
+        String longitude = longitudeLocationTextField.getText();
 
-        this.locations.add(new Location(id, name, city, country, latitude, longitude));
+        Response response = LocationController.createLocation(
+                id, name, city, country, latitude, longitude
+        );
 
-        this.departureLocationFlightComboBox.addItem(id);
-        this.arrivalLocationFlightComboBox.addItem(id);
-        this.scaleLocationFlightComboBox.addItem(id);
+        if (response.getStatus() >= 500) {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.ERROR_MESSAGE);
+        } else if (response.getStatus() >= 400) {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.WARNING_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Response Message", JOptionPane.INFORMATION_MESSAGE);
+
+            idLocationTextField.setText("");
+            nameLocationTextField.setText("");
+            cityLocationTextField.setText("");
+            countryLocationTextField.setText("");
+            latitudeLocationTextField.setText("");
+            longitudeLocationTextField.setText("");
+
+            this.departureLocationFlightComboBox.addItem(id);
+            this.arrivalLocationFlightComboBox.addItem(id);
+            this.scaleLocationFlightComboBox.addItem(id);
+        }
+
     }//GEN-LAST:event_createLocationButtonActionPerformed
 
     private void createFlightButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createFlightButtonActionPerformed
@@ -1732,11 +1751,10 @@ public class AirportFrame extends javax.swing.JFrame {
     private void userSelectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_userSelectActionPerformed
         try {
             String id = userSelect.getSelectedItem().toString();
-            if (! id.equals(userSelect.getItemAt(0))) {
+            if (!id.equals(userSelect.getItemAt(0))) {
                 idUpdateTextField.setText(id);
                 idPassengerAddTextField.setText(id);
-            }
-            else{
+            } else {
                 idUpdateTextField.setText("");
                 idPassengerAddTextField.setText("");
             }
