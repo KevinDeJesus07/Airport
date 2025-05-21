@@ -10,6 +10,7 @@ import core.models.Passenger;
 import core.models.Plane;
 import com.formdev.flatlaf.FlatDarkLaf;
 import core.controllers.PassengerController;
+import core.controllers.PlaneController;
 import core.controllers.utils.Response;
 import java.awt.Color;
 import java.time.LocalDate;
@@ -1505,16 +1506,33 @@ public class AirportFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_createPassengerButtonActionPerformed
 
     private void createPlaneButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createPlaneButtonActionPerformed
-        // TODO add your handling code here:
+        
         String id = idPlaneTextField.getText();
         String brand = brandPlaneTextField.getText();
         String model = modelPlaneTextField.getText();
-        int maxCapacity = Integer.parseInt(maxCapacityPlaneTextField.getText());
+        String maxCapacity = maxCapacityPlaneTextField.getText();
         String airline = airlinePlaneTextField.getText();
-
-        this.planes.add(new Plane(id, brand, model, maxCapacity, airline));
-
-        this.planeFlightComboBox.addItem(id);
+        
+        Response response = PlaneController.createPlane(
+            id, brand, model, maxCapacity, airline
+        );
+        
+        if (response.getStatus() >= 500) {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.ERROR_MESSAGE);
+        } else if (response.getStatus() >= 400) {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.WARNING_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Response Message", JOptionPane.INFORMATION_MESSAGE);
+            
+            idPlaneTextField.setText("");
+            brandPlaneTextField.setText("");
+            modelPlaneTextField.setText("");
+            maxCapacityPlaneTextField.setText("");
+            airlinePlaneTextField.setText("");
+            
+            this.planeFlightComboBox.addItem(id);
+        }
+        
     }//GEN-LAST:event_createPlaneButtonActionPerformed
 
     private void createLocationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createLocationButtonActionPerformed
