@@ -1816,15 +1816,6 @@ public class AirportFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_refreshAllFlightsButtonActionPerformed
 
     private void refreshAllPlanesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshAllPlanesButtonActionPerformed
-        // TODO add your handling code here:
-        DefaultTableModel model = (DefaultTableModel) allPlanesTable.getModel();
-        model.setRowCount(0);
-        for (Plane plane : this.planes) {
-            model.addRow(new Object[]{plane.getId(), plane.getBrand(), plane.getModel(), plane.getMaxCapacity(), plane.getAirline(), plane.getNumFlights()});
-        }
-    }//GEN-LAST:event_refreshAllPlanesButtonActionPerformed
-
-    private void refreshAllLocationsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshAllLocationsButtonActionPerformed
 
         Response response = PlaneController.getSortedPlanes();
 
@@ -1845,6 +1836,29 @@ public class AirportFrame extends javax.swing.JFrame {
                     plane.getMaxCapacity(),
                     plane.getAirline(),
                     plane.getNumFlights()
+                });
+            }
+        }
+    }//GEN-LAST:event_refreshAllPlanesButtonActionPerformed
+
+    private void refreshAllLocationsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshAllLocationsButtonActionPerformed
+        
+        Response response = LocationController.getSortedLocations();
+
+        if (response.getStatus() >= 500) {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.ERROR_MESSAGE);
+        } else if (response.getStatus() >= 400) {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.WARNING_MESSAGE);
+        } else {
+            ArrayList<Location> locations = (ArrayList<Location>) response.getObject();
+            DefaultTableModel model = (DefaultTableModel) allLocationsTable.getModel();
+            model.setRowCount(0);
+            for (Location location : locations) {
+                model.addRow(new Object[]{
+                    location.getAirportId(),
+                    location.getAirportName(),
+                    location.getAirportCity(),
+                    location.getAirportCountry()
                 });
             }
         }
