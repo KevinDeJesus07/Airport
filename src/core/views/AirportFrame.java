@@ -1708,7 +1708,7 @@ public class AirportFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_addToFlightButtonActionPerformed
 
     private void delayButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_delayButtonActionPerformed
-        
+
         String flightId = idDelayComboBox.getItemAt(idDelayComboBox.getSelectedIndex());
         String hours = hourDelayComboBox.getItemAt(hourDelayComboBox.getSelectedIndex());
         String minutes = minutesDelayComboBox.getItemAt(minutesDelayComboBox.getSelectedIndex());
@@ -1735,21 +1735,27 @@ public class AirportFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_delayButtonActionPerformed
 
     private void refreshMyFlightsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshMyFlightsButtonActionPerformed
-        // TODO add your handling code here:
-        long passengerId = Long.parseLong(userSelect.getItemAt(userSelect.getSelectedIndex()));
+        String passengerId = userSelect.getItemAt(userSelect.getSelectedIndex());
 
-        Passenger passenger = null;
-        for (Passenger p : this.passengers) {
-            if (p.getId() == passengerId) {
-                passenger = p;
+        Response response = PassengerController.showMyFlights(passengerId);
+
+        if (response.getStatus() >= 500) {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.ERROR_MESSAGE);
+        } else if (response.getStatus() >= 400) {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.WARNING_MESSAGE);
+        } else {
+         
+            ArrayList<Flight> flights = (ArrayList<Flight>) response.getObject();
+
+            DefaultTableModel model = (DefaultTableModel) myFlightsTable.getModel();
+            model.setRowCount(0);
+            for (Flight flight : flights) {
+                model.addRow(new Object[]{
+                    flight.getId(),
+                    flight.getDepartureDate(),
+                    flight.calculateArrivalDate()
+                });
             }
-        }
-
-        ArrayList<Flight> flights = passenger.getFlights();
-        DefaultTableModel model = (DefaultTableModel) myFlightsTable.getModel();
-        model.setRowCount(0);
-        for (Flight flight : flights) {
-            model.addRow(new Object[]{flight.getId(), flight.getDepartureDate(), flight.calculateArrivalDate()});
         }
     }//GEN-LAST:event_refreshMyFlightsButtonActionPerformed
 
