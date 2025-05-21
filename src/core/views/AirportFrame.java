@@ -1646,7 +1646,7 @@ public class AirportFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_createFlightButtonActionPerformed
 
     private void updatePassengerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updatePassengerButtonActionPerformed
-        
+
         String id = idUpdateTextField.getText();
         String firstname = firstnameUpdateTextField.getText();
         String lastname = lastnameUpdateTextField.getText();
@@ -1683,46 +1683,55 @@ public class AirportFrame extends javax.swing.JFrame {
             phoneCodeUpdateTextField.setText("");
             phoneUpdateTextField.setText("");
             countryUpdateTextField.setText("");
+        }
     }//GEN-LAST:event_updatePassengerButtonActionPerformed
 
     private void addToFlightButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addToFlightButtonActionPerformed
-        // TODO add your handling code here:
-        long passengerId = Long.parseLong(idPassengerAddTextField.getText());
+
+        String passengerId = idPassengerAddTextField.getText();
         String flightId = flightAddComboBox.getItemAt(flightAddComboBox.getSelectedIndex());
 
-        Passenger passenger = null;
-        Flight flight = null;
+        Response response = FlightController.addFlight(passengerId, flightId);
 
-        for (Passenger p : this.passengers) {
-            if (p.getId() == passengerId) {
-                passenger = p;
+        if (response.getStatus() >= 500) {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.ERROR_MESSAGE);
+        } else if (response.getStatus() >= 400) {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.WARNING_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Response Message", JOptionPane.INFORMATION_MESSAGE);
+
+            idPassengerAddTextField.setText("");
+            if (flightAddComboBox.getItemCount() > 0) {
+                flightAddComboBox.setSelectedIndex(0);
             }
         }
-
-        for (Flight f : this.flights) {
-            if (flightId.equals(f.getId())) {
-                flight = f;
-            }
-        }
-
-        passenger.addFlight(flight);
-        flight.addPassenger(passenger);
     }//GEN-LAST:event_addToFlightButtonActionPerformed
 
     private void delayButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_delayButtonActionPerformed
-        // TODO add your handling code here:
+        
         String flightId = idDelayComboBox.getItemAt(idDelayComboBox.getSelectedIndex());
-        int hours = Integer.parseInt(hourDelayComboBox.getItemAt(hourDelayComboBox.getSelectedIndex()));
-        int minutes = Integer.parseInt(minutesDelayComboBox.getItemAt(minutesDelayComboBox.getSelectedIndex()));
+        String hours = hourDelayComboBox.getItemAt(hourDelayComboBox.getSelectedIndex());
+        String minutes = minutesDelayComboBox.getItemAt(minutesDelayComboBox.getSelectedIndex());
 
-        Flight flight = null;
-        for (Flight f : this.flights) {
-            if (flightId.equals(f.getId())) {
-                flight = f;
+        Response response = FlightController.delayFlight(flightId, hours, minutes);
+
+        if (response.getStatus() >= 500) {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.ERROR_MESSAGE);
+        } else if (response.getStatus() >= 400) {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.WARNING_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null, response.getMessage(), "Response Message", JOptionPane.INFORMATION_MESSAGE);
+
+            if (idDelayComboBox.getItemCount() > 0) {
+                idDelayComboBox.setSelectedIndex(0);
+            }
+            if (hourDelayComboBox.getItemCount() > 0) {
+                hourDelayComboBox.setSelectedIndex(0);
+            }
+            if (minutesDelayComboBox.getItemCount() > 0) {
+                minutesDelayComboBox.setSelectedIndex(0);
             }
         }
-
-        flight.delay(hours, minutes);
     }//GEN-LAST:event_delayButtonActionPerformed
 
     private void refreshMyFlightsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshMyFlightsButtonActionPerformed
