@@ -28,6 +28,7 @@ public class Storage {
         this.flights = new ArrayList<>();
         this.locations = new ArrayList<>();
         this.planes = new ArrayList<>();
+        this.passengers = new ArrayList<>();
     }
 
     public static Storage getInstance() {
@@ -159,25 +160,45 @@ public class Storage {
 
     public ArrayList<Location> getSortedLocations() {
         ArrayList<Location> sortedLocations = new ArrayList<>(locations);
-        sortedLocations.sort(Comparator.comparing(loc -> Integer.valueOf(loc.getId())));
+        for (Location l : locations) {
+            if (l != null && l.getId() != null) {
+                sortedLocations.add(l);
+            }
+        }
+        sortedLocations.sort(Comparator.comparing(Location::getId));
         return sortedLocations;
     }
 
     public ArrayList<Passenger> getSortedPassengers() {
         ArrayList<Passenger> sortedPassengers = new ArrayList<>(passengers);
+        for (Passenger p : passengers) {
+            if (p != null) {
+                sortedPassengers.add(p);
+            }
+        }
         sortedPassengers.sort(Comparator.comparingLong(Passenger::getId));
         return sortedPassengers;
     }
 
     public ArrayList<Flight> getSortedFlights() {
         ArrayList<Flight> sortedFlights = new ArrayList<>(flights);
+        for (Flight f : flights) {
+            if (f != null) {
+                sortedFlights.add(f);
+            }
+        }
         sortedFlights.sort(Comparator.comparing(Flight::getDepartureDate));
         return sortedFlights;
     }
 
     public ArrayList<Plane> getSortedPlanes() {
         ArrayList<Plane> sortedPlanes = new ArrayList<>(planes);
-        sortedPlanes.sort(Comparator.comparing(loc -> Integer.valueOf(loc.getId())));
+        for (Plane p : planes) {
+            if (p != null && p.getId() != null) {
+                sortedPlanes.add(p);
+            }
+        }
+        sortedPlanes.sort(Comparator.comparing(Plane::getId));
         return sortedPlanes;
     }
 }

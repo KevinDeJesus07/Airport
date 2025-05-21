@@ -390,6 +390,7 @@ public class PassengerController {
             }
             return new Response("Passengers loaded succesfully.", Status.OK, passengersCopy);
         } catch (Exception ex) {
+            ex.printStackTrace();
             return new Response("Unexpected error.", Status.INTERNAL_SERVER_ERROR);
         }
     }
