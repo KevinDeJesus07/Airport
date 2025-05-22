@@ -9,6 +9,7 @@ import core.models.Location;
 import core.models.Passenger;
 import core.models.Plane;
 import core.models.storage.Storage;
+import core.utils.events.DataType;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -17,6 +18,7 @@ import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -54,6 +56,8 @@ public class FileManager {
         loadPlanes(planesFilePath);
         loadPassengers(passengersFilePath);
         loadFlights(flightsFilePath);
+        
+        linkFlights();
     }
 
     private static void loadLocations(String filePath) {
@@ -149,6 +153,31 @@ public class FileManager {
             ex.printStackTrace();
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+    
+    private static void linkFlights() {
+        List<Passenger> passengers = Storage.getInstance().getPassengers();
+        List<Flight> flights = Storage.getInstance().getFlights();
+        
+        if (passengers.isEmpty() || flights.isEmpty()) {
+            return;
+        }
+        
+        int links = 0;
+        for (int i = 0; i < Math.min(passengers.size(), flights.size()); i++) {
+            Passenger p = passengers.get(i);
+            Flight f = flights.get(i);
+            
+            if (p != null && f != null) {
+                p.addFlight(f);
+                f.addPassenger(p);
+                links++;
+            }
+        }
+        if (links > 0) {
+            Storage.getInstance().notifyListeners(DataType.PASSENGER);
+            Storage.getInstance().notifyListeners(DataType.FLIGHT);
         }
     }
 

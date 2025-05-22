@@ -39,18 +39,18 @@ public class Storage {
             listeners.put(type, new ArrayList<>());
         }
     }
-    
+
     public void subscribe(DataType eventType, EventListeners listener) {
         listeners.get(eventType).add(listener);
     }
-    
+
     public void unsubscribe(DataType eventType, EventListeners listener) {
         if (listeners.containsKey(eventType)) {
             listeners.get(eventType).remove(listener);
         }
     }
-    
-    private void notifyListeners(DataType eventType) {
+
+    public void notifyListeners(DataType eventType) {
         List<EventListeners> l = listeners.get(eventType);
         if (l != null) {
             for (EventListeners listener : l) {
@@ -66,6 +66,14 @@ public class Storage {
             instance = new Storage();
         }
         return instance;
+    }
+
+    public ArrayList<Flight> getFlights() {
+        return this.flights;
+    }
+
+    public ArrayList<Passenger> getPassengers() {
+        return this.passengers;
     }
 
     public Flight getFlight(String id) {
@@ -174,9 +182,9 @@ public class Storage {
         updatePassenger.setCountryPhoneCode(passenger.getCountryPhoneCode());
         updatePassenger.setPhone(passenger.getPhone());
         updatePassenger.setCountry(passenger.getCountry());
-        
+
         notifyListeners(DataType.PASSENGER);
-        
+
         return true;
     }
 
@@ -230,11 +238,11 @@ public class Storage {
             return new ArrayList<>();
         }
         ArrayList<Location> sortedLocations = new ArrayList<>(locations);
-        
+
         sortedLocations.removeIf(l -> l == null || l.getId() == null);
 
         sortedLocations.sort(Comparator.comparing(Location::getId));
-        
+
         return sortedLocations;
     }
 

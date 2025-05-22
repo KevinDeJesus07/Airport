@@ -66,27 +66,29 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
         this.generateHours();
         this.generateMinutes();
         this.blockPanels();
+
         
-        //refreshPassengerUIComponents();
-        //refreshLocationUIComponents();
-        //refreshPlaneUIComponents();
-        //refreshFlightUIComponents();
+        refreshPassengerUIComponents();
+        refreshLocationUIComponents();
+        refreshPlaneUIComponents();
+        refreshFlightUIComponents();
+        
     }
 
     @Override
     public void update(DataType type) {
         SwingUtilities.invokeLater(() -> {
             if (type == DataType.PASSENGER || type == DataType.ALL) {
-                //refreshPassengerUIComponents();
+                refreshPassengerUIComponents();
             }
             if (type == DataType.LOCATION || type == DataType.ALL) {
-                //refreshLocationUIComponents();
+                refreshLocationUIComponents();
             }
             if (type == DataType.PLANE || type == DataType.PLANE) {
-                //refreshPlaneUIComponents();
+                refreshPlaneUIComponents();
             }
             if (type == DataType.FLIGHT || type == DataType.FLIGHT) {
-                //refreshFlightUIComponents();
+                refreshFlightUIComponents();
             }
         });
     }
@@ -188,12 +190,8 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
                         for (Flight f : flights) {
                             model.addRow(new Object[]{
                                 f.getId(),
-                                f.getPlane(),
-                                f.getDepartureLocation(),
-                                f.getArrivalLocation(),
                                 f.getDepartureDate(),
-                                f.getHoursDurationArrival(),
-                                f.getMinutesDurationArrival()
+                                f.calculateArrivalDate()
                             });
                         }
                     }
@@ -2249,6 +2247,7 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
                     passenger.getCountry(),
                     passenger.getNumFlights()
                 });
+                System.out.println(passenger.getNumFlights());
             }
         }
     }//GEN-LAST:event_refreshAllPassengersButtonActionPerformed
