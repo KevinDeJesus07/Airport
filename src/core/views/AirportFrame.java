@@ -25,6 +25,8 @@ import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 import core.utils.events.EventListeners;
 import core.utils.events.DataType;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.List;
 import javax.swing.JComboBox;
 import javax.swing.SwingUtilities;
@@ -60,6 +62,21 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
 
         this.setBackground(new Color(0, 0, 0, 0));
         this.setLocationRelativeTo(null);
+        
+        
+        if (userSelect != null) {
+            userSelect.addItemListener(new ItemListener(){
+                @Override
+                public void itemStateChanged(ItemEvent evt) {
+                    if (evt.getStateChange() == ItemEvent.SELECTED) {
+                        refreshMyFlightsTable();
+                    }
+                }
+            });
+        }
+        
+        
+    
 
         this.generateMonths();
         this.generateDays();
@@ -67,12 +84,11 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
         this.generateMinutes();
         this.blockPanels();
 
-        
         refreshPassengerUIComponents();
         refreshLocationUIComponents();
         refreshPlaneUIComponents();
         refreshFlightUIComponents();
-        
+
     }
 
     @Override
@@ -188,11 +204,13 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
                     List<Flight> flights = (List<Flight>) response.getObject();
                     if (flights != null && !flights.isEmpty()) {
                         for (Flight f : flights) {
-                            model.addRow(new Object[]{
-                                f.getId(),
-                                f.getDepartureDate(),
-                                f.calculateArrivalDate()
-                            });
+                            if (f != null) {
+                                model.addRow(new Object[]{
+                                    f.getId(),
+                                    (f.getDepartureDate() != null) ? f.getDepartureDate() : "",
+                                    (f.calculateArrivalDate() != null) ? f.calculateArrivalDate() : ""
+                                });
+                            }
                         }
                     }
                 } catch (ClassCastException ex) {
@@ -218,14 +236,18 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
         model.setRowCount(0);
         if (flighList != null) {
             for (Flight f : flighList) {
-                model.addRow(new Object[]{
-                    f.getId(),
-                    (f.getPlane() != null) ? f.getPlane().getId() : "",
-                    (f.getDepartureLocation() != null) ? f.getDepartureLocation().getId() : "",
-                    (f.getArrivalLocation() != null) ? f.getArrivalLocation().getId() : "",
-                    f.getDepartureDate(),
-                    f.calculateArrivalDate()
-                });
+                if (f != null) {
+                    model.addRow(new Object[]{
+                        f.getId(),
+                        (f.getDepartureLocation() != null && f.getDepartureLocation().getId() != null) ? f.getDepartureLocation().getId() : "",
+                        (f.getArrivalLocation() != null && f.getArrivalLocation().getId() != null) ? f.getArrivalLocation().getId() : "",
+                        (f.getScaleLocation() != null && f.getScaleLocation().getId() != null) ? f.getScaleLocation().getId() : "",
+                        (f.getDepartureDate() != null) ? f.getDepartureDate() : "",
+                        (f.calculateArrivalDate() != null) ? f.calculateArrivalDate() : "",
+                        (f.getPlane() != null && f.getPlane().getId() != null) ? f.getPlane().getId() : "",
+                        f.getNumPassengers()
+                    });
+                }
             }
         }
     }
@@ -316,7 +338,7 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
                         p.getModel(),
                         p.getMaxCapacity(),
                         p.getAirline(),
-                        p.getFlights()
+                        p.getNumFlights()
                     });
                 }
             }
@@ -376,9 +398,7 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
                         l.getAirportId(),
                         l.getAirportName(),
                         l.getAirportCity(),
-                        l.getAirportCountry(),
-                        l.getAirportLatitude(),
-                        l.getAirportLongitude()
+                        l.getAirportCountry()
                     });
                 }
             }
@@ -397,12 +417,12 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
                 if (p != null) {
                     model.addRow(new Object[]{
                         p.getId(),
-                        p.getFirstname(),
-                        p.getLastname(),
-                        p.getBirthDate(),
-                        p.getCountryPhoneCode(),
-                        p.getPhone(),
-                        p.getCountry()
+                        p.getFullname(),
+                        (p.getBirthDate() != null) ? p.getBirthDate() : "",
+                        p.calculateAge(),
+                        p.generateFullPhone(),
+                        p.getCountry(),
+                        p.getNumFlights()
                     });
                 }
             }

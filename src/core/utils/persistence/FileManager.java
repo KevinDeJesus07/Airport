@@ -58,6 +58,7 @@ public class FileManager {
         loadFlights(flightsFilePath);
         
         linkFlights();
+        Storage.getInstance().notifyListeners(DataType.ALL);
     }
 
     private static void loadLocations(String filePath) {
