@@ -25,6 +25,8 @@ import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 import core.utils.events.EventListeners;
 import core.utils.events.DataType;
+import java.util.List;
+import javax.swing.JComboBox;
 import javax.swing.SwingUtilities;
 
 /**
@@ -50,7 +52,7 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
         storage.subscribe(DataType.LOCATION, this);
         storage.subscribe(DataType.PLANE, this);
         storage.subscribe(DataType.FLIGHT, this);
-        
+
         this.passengers = new ArrayList<>();
         this.planes = new ArrayList<>();
         this.locations = new ArrayList<>();
@@ -64,56 +66,453 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
         this.generateHours();
         this.generateMinutes();
         this.blockPanels();
+        
+        //refreshPassengerUIComponents();
+        //refreshLocationUIComponents();
+        //refreshPlaneUIComponents();
+        //refreshFlightUIComponents();
     }
-    
+
     @Override
     public void update(DataType type) {
         SwingUtilities.invokeLater(() -> {
             if (type == DataType.PASSENGER || type == DataType.ALL) {
-                populateAllPassengerComboBoxes();
-                refreshPassengerTable();
+                //refreshPassengerUIComponents();
             }
             if (type == DataType.LOCATION || type == DataType.ALL) {
-                populationAllLocationComboBoxes();
-                refreshLocationTable();
+                //refreshLocationUIComponents();
             }
             if (type == DataType.PLANE || type == DataType.PLANE) {
-                populateAllPlaneComboBoxes();
-                refreshPlaneTable();
+                //refreshPlaneUIComponents();
             }
             if (type == DataType.FLIGHT || type == DataType.FLIGHT) {
-                
+                //refreshFlightUIComponents();
             }
         });
     }
-    
-    private void populateAllPassengerComboBoxes() {
-        Response response = PassengerController.getSortedPassengers();
-        
-        if (userSelect != null && response.getStatus() == Status.OK) {
-            userSelect.removeAllItems();
+
+    private void refreshFlightUIComponents() {
+        Response response = FlightController.getSortedFlights();
+
+        List<Flight> flights = null;
+        boolean success = false;
+        if (response.getStatus() < 400 && response.getObject() != null) {
+            try {
+                flights = (List<Flight>) response.getObject();
+                success = true;
+            } catch (ClassCastException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this,
+                        "Error interno: Datos de vuelos con formato inesperado.",
+                        "Error de Datos", JOptionPane.ERROR_MESSAGE);
+                flights = new ArrayList<>();
+            }
+        } else if (response.getStatus() >= 400) {
+            JOptionPane.showMessageDialog(this,
+                    response.getMessage(), "Error " + response.getStatus(),
+                    JOptionPane.WARNING_MESSAGE);
+            flights = new ArrayList<>();
+        } else {
+            flights = new ArrayList<>();
+            success = true;
         }
-        
+
+        if (flights == null) {
+            flights = new ArrayList<>();
+        }
+
+        populateFlightComboBox(flights);
+        refreshAllFlightsTable(flights);
+        refreshMyFlightsTable();
     }
-    
-    private void populationAllLocationComboBoxes() {
-        
+
+    private void populateFlightComboBox(List<Flight> flightList) {
+        if (idDelayComboBox == null) {
+            return;
+        }
+
+        Object select = idDelayComboBox.getSelectedItem();
+        String st = null;
+        if (select != null) {
+            st = select.toString();
+        }
+
+        idDelayComboBox.removeAllItems();
+        idDelayComboBox.addItem("ID");
+
+        if (idDelayComboBox != null) {
+            for (Flight f : flightList) {
+                if (f != null) {
+                    idDelayComboBox.addItem("" + f.getId());
+                }
+            }
+        }
+
+        if (st != null) {
+            idDelayComboBox.setSelectedItem(st);
+            if (idDelayComboBox.getSelectedIndex() <= 0 && !st.equals("ID") && idDelayComboBox.getItemCount() > 1) {
+                idDelayComboBox.setSelectedIndex(0);
+            } else if (idDelayComboBox.getSelectedIndex() == -1 && idDelayComboBox.getItemCount() > 0) {
+                idDelayComboBox.setSelectedIndex(0);
+            }
+        } else {
+            if (idDelayComboBox.getItemCount() > 0) {
+                idDelayComboBox.setSelectedIndex(0);
+            }
+        }
     }
-    
-    private void populateAllPlaneComboBoxes() {
-        
+
+    private void refreshMyFlightsTable() {
+        if (myFlightsTable == null || userSelect == null) {
+            if (myFlightsTable != null) {
+                ((DefaultTableModel) myFlightsTable.getModel()).setRowCount(0);
+            }
+            return;
+        }
+        DefaultTableModel model = (DefaultTableModel) myFlightsTable.getModel();
+        model.setRowCount(0);
+
+        String id = null;
+        if (userSelect.getSelectedIndex() > 0) {
+            Object select = userSelect.getSelectedItem();
+            if (select != null) {
+                id = select.toString();
+            }
+        }
+        if (id != null && !id.trim().isEmpty()) {
+            Response response = PassengerController.showMyFlights(id);
+            if (response.getStatus() < 400 && response.getObject() != null) {
+                try {
+                    List<Flight> flights = (List<Flight>) response.getObject();
+                    if (flights != null && !flights.isEmpty()) {
+                        for (Flight f : flights) {
+                            model.addRow(new Object[]{
+                                f.getId(),
+                                f.getPlane(),
+                                f.getDepartureLocation(),
+                                f.getArrivalLocation(),
+                                f.getDepartureDate(),
+                                f.getHoursDurationArrival(),
+                                f.getMinutesDurationArrival()
+                            });
+                        }
+                    }
+                } catch (ClassCastException ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(this,
+                            "Error interno: Datos de 'Mis Vuelos' con formato inesperado.",
+                            "Error de Datos", JOptionPane.ERROR_MESSAGE);
+                }
+            } else if (response.getStatus() >= 400) {
+                JOptionPane.showMessageDialog(this,
+                        response.getMessage(),
+                        "Error al Cargar 'Mis Vuelos' (Status: " + response.getStatus() + ")",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
-    
-    private void refreshPassengerTable() {
-        
+
+    private void refreshAllFlightsTable(List<Flight> flighList) {
+        if (allFlightsTable == null) {
+            return;
+        }
+        DefaultTableModel model = (DefaultTableModel) allFlightsTable.getModel();
+        model.setRowCount(0);
+        if (flighList != null) {
+            for (Flight f : flighList) {
+                model.addRow(new Object[]{
+                    f.getId(),
+                    (f.getPlane() != null) ? f.getPlane().getId() : "",
+                    (f.getDepartureLocation() != null) ? f.getDepartureLocation().getId() : "",
+                    (f.getArrivalLocation() != null) ? f.getArrivalLocation().getId() : "",
+                    f.getDepartureDate(),
+                    f.calculateArrivalDate()
+                });
+            }
+        }
     }
-    
-    private void refreshLocationTable() {
-        
+
+    private void refreshPassengerUIComponents() {
+        Response response = PassengerController.getSortedPassengers();
+
+        List<Passenger> passengers = null;
+        boolean success = false;
+        if (response.getStatus() < 400 && response.getObject() != null) {
+            try {
+                passengers = (List<Passenger>) response.getObject();
+                success = true;
+            } catch (ClassCastException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this,
+                        "Error interno: Datos de pasajeros con formato inesperado.",
+                        "Error de Datos", JOptionPane.ERROR_MESSAGE);
+                passengers = new ArrayList<>();
+            }
+        } else if (response.getStatus() >= 400) {
+            JOptionPane.showMessageDialog(this,
+                    response.getMessage(), "Error " + response.getStatus(),
+                    JOptionPane.WARNING_MESSAGE);
+            passengers = new ArrayList<>();
+        } else {
+            passengers = new ArrayList<>();
+            success = true;
+        }
+
+        if (passengers == null) {
+            passengers = new ArrayList<>();
+        }
+
+        populateUserSelectComboBox(passengers);
+        refreshPassengerTable(passengers);
     }
-    
-    private void refreshPlaneTable() {
-        
+
+    private void refreshLocationUIComponents() {
+        Response response = LocationController.getSortedLocations();
+
+        List<Location> locations = null;
+        boolean success = false;
+        if (response.getStatus() < 400 && response.getObject() != null) {
+            try {
+                locations = (List<Location>) response.getObject();
+                success = true;
+            } catch (ClassCastException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this,
+                        "Error interno: Datos de localizaciones con formato inesperado.",
+                        "Error de Datos", JOptionPane.ERROR_MESSAGE);
+                locations = new ArrayList<>();
+            }
+        } else if (response.getStatus() >= 400) {
+            JOptionPane.showMessageDialog(this,
+                    response.getMessage(), "Error " + response.getStatus(),
+                    JOptionPane.WARNING_MESSAGE);
+            locations = new ArrayList<>();
+        } else {
+            locations = new ArrayList<>();
+            success = true;
+        }
+
+        if (locations == null) {
+            locations = new ArrayList<>();
+        }
+
+        populateLocationComboBox(departureLocationFlightComboBox, locations, "Location");
+        populateLocationComboBox(arrivalLocationFlightComboBox, locations, "Location");
+        populateLocationComboBox(scaleLocationFlightComboBox, locations, "Location");
+        refreshLocationTable(locations);
+    }
+
+    private void refreshPlaneTable(List<Plane> planeList) {
+        if (allPlanesTable == null) {
+            return;
+        }
+        DefaultTableModel model = (DefaultTableModel) allPlanesTable.getModel();
+        model.setRowCount(0);
+
+        if (planeList != null) {
+            for (Plane p : planeList) {
+                if (p != null) {
+                    model.addRow(new Object[]{
+                        p.getId(),
+                        p.getBrand(),
+                        p.getModel(),
+                        p.getMaxCapacity(),
+                        p.getAirline(),
+                        p.getFlights()
+                    });
+                }
+            }
+        }
+    }
+
+    private void populateLocationComboBox(
+            JComboBox<String> comboBox,
+            List<Location> locationList,
+            String placeholder
+    ) {
+        if (comboBox == null) {
+            return;
+        }
+        Object select = comboBox.getSelectedItem();
+        String st = null;
+        if (select != null) {
+            st = select.toString();
+        }
+
+        comboBox.removeAllItems();
+        comboBox.addItem(placeholder);
+
+        if (locationList != null) {
+            for (Location l : locationList) {
+                if (l != null) {
+                    comboBox.addItem("" + l.getId());
+                }
+            }
+        }
+
+        if (st != null) {
+            comboBox.setSelectedItem(st);
+            if (comboBox.getSelectedIndex() <= 0 && !st.equals(placeholder) && comboBox.getItemCount() > 1) {
+                comboBox.setSelectedIndex(0);
+            } else if (comboBox.getSelectedIndex() == -1 && comboBox.getItemCount() > 0) {
+                comboBox.setSelectedIndex(0);
+            }
+        } else {
+            if (comboBox.getItemCount() > 0) {
+                comboBox.setSelectedIndex(0);
+            }
+        }
+    }
+
+    private void refreshLocationTable(List<Location> locationList) {
+        if (allLocationsTable == null) {
+            return;
+        }
+        DefaultTableModel model = (DefaultTableModel) allLocationsTable.getModel();
+        model.setRowCount(0);
+
+        if (locationList != null) {
+            for (Location l : locationList) {
+                if (l != null) {
+                    model.addRow(new Object[]{
+                        l.getAirportId(),
+                        l.getAirportName(),
+                        l.getAirportCity(),
+                        l.getAirportCountry(),
+                        l.getAirportLatitude(),
+                        l.getAirportLongitude()
+                    });
+                }
+            }
+        }
+    }
+
+    private void refreshPassengerTable(List<Passenger> passengerList) {
+        if (allPassengersTable == null) {
+            return;
+        }
+        DefaultTableModel model = (DefaultTableModel) allPassengersTable.getModel();
+        model.setRowCount(0);
+
+        if (passengerList != null) {
+            for (Passenger p : passengerList) {
+                if (p != null) {
+                    model.addRow(new Object[]{
+                        p.getId(),
+                        p.getFirstname(),
+                        p.getLastname(),
+                        p.getBirthDate(),
+                        p.getCountryPhoneCode(),
+                        p.getPhone(),
+                        p.getCountry()
+                    });
+                }
+            }
+        }
+    }
+
+    private void populateUserSelectComboBox(List<Passenger> passengerList) {
+        if (userSelect == null) {
+            return;
+        }
+        Object select = userSelect.getSelectedItem();
+        String st = null;
+        if (select != null) {
+            st = select.toString();
+        }
+
+        userSelect.removeAllItems();
+        userSelect.addItem("Select User");
+
+        if (passengerList != null) {
+            for (Passenger p : passengerList) {
+                if (p != null) {
+                    userSelect.addItem("" + p.getId());
+                }
+            }
+        }
+
+        if (st != null) {
+            userSelect.setSelectedItem(st);
+            if (userSelect.getSelectedIndex() <= 0 && !st.equals("Select User") && userSelect.getItemCount() > 1) {
+                userSelect.setSelectedIndex(0);
+            } else if (userSelect.getSelectedIndex() == -1 && userSelect.getItemCount() > 0) {
+                userSelect.setSelectedIndex(0);
+            }
+        } else {
+            if (userSelect.getItemCount() > 0) {
+                userSelect.setSelectedIndex(0);
+            }
+        }
+    }
+
+    private void populateAllPlaneComboBoxes(List<Plane> planeList) {
+        if (planeFlightComboBox == null) {
+            return;
+        }
+        Object select = planeFlightComboBox.getSelectedItem();
+        String st = null;
+        if (select != null) {
+            st = select.toString();
+        }
+
+        planeFlightComboBox.removeAllItems();
+        planeFlightComboBox.addItem("Plane");
+
+        if (planeList != null) {
+            for (Plane p : planeList) {
+                if (p != null) {
+                    planeFlightComboBox.addItem("" + p.getId());
+                }
+            }
+        }
+
+        if (st != null) {
+            planeFlightComboBox.setSelectedItem(st);
+            if (planeFlightComboBox.getSelectedIndex() <= 0 && !st.equals("Plane") && planeFlightComboBox.getItemCount() > 1) {
+                planeFlightComboBox.setSelectedIndex(0);
+            } else if (planeFlightComboBox.getSelectedIndex() == -1 && planeFlightComboBox.getItemCount() > 0) {
+                planeFlightComboBox.setSelectedIndex(0);
+            }
+        } else {
+            if (planeFlightComboBox.getItemCount() > 0) {
+                planeFlightComboBox.setSelectedIndex(0);
+            }
+        }
+    }
+
+    private void refreshPlaneUIComponents() {
+        Response response = PlaneController.getSortedPlanes();
+
+        List<Plane> planes = null;
+        boolean success = false;
+        if (response.getStatus() < 400 && response.getObject() != null) {
+            try {
+                planes = (List<Plane>) response.getObject();
+                success = true;
+            } catch (ClassCastException ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this,
+                        "Error interno: Datos de aviones con formato inesperado.",
+                        "Error de Datos", JOptionPane.ERROR_MESSAGE);
+                planes = new ArrayList<>();
+            }
+        } else if (response.getStatus() >= 400) {
+            JOptionPane.showMessageDialog(this,
+                    response.getMessage(), "Error " + response.getStatus(),
+                    JOptionPane.WARNING_MESSAGE);
+            planes = new ArrayList<>();
+        } else {
+            planes = new ArrayList<>();
+            success = true;
+        }
+
+        if (planes == null) {
+            planes = new ArrayList<>();
+        }
+
+        populateAllPlaneComboBoxes(planes);
+        refreshPlaneTable(planes);
     }
 
     private void blockPanels() {
@@ -1909,7 +2308,7 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
     }//GEN-LAST:event_refreshAllPlanesButtonActionPerformed
 
     private void refreshAllLocationsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshAllLocationsButtonActionPerformed
-        
+
         Response response = LocationController.getSortedLocations();
 
         if (response.getStatus() >= 500) {
