@@ -338,25 +338,20 @@ public class PassengerController {
         try {
             long passengerIdLong;
             if (passengerId == null || passengerId.trim().isEmpty()) {
-                System.out.println("Passenger id must be not empty.");
                 return new Response("Passenger id must be not empty.", Status.BAD_REQUEST);
             }
             try {
                 passengerIdLong = Long.parseLong(passengerId.trim());
                 if (passengerIdLong <= 0) {
-                    System.out.println("Passenger id must be positive.");
                     return new Response("Passenger id must be positive.", Status.BAD_REQUEST);
                 }
             } catch (NumberFormatException ex) {
-                System.out.println("Passenger id must be a number.");
                 return new Response("Passenger id must be a number.", Status.BAD_REQUEST);
             }
             if (passengerId.trim().length() > 15) {
-                System.out.println("Passenger id must have a maximum of 15 digits.");
                 return new Response("Passenger id must have a maximum of 15 digits.", Status.BAD_REQUEST);
             }
             if (Storage.getInstance().getPassenger(passengerId) == null) {
-                System.out.println("Passenger id not exist.");
                 return new Response("Passenger id not exist.", Status.BAD_REQUEST);
             }
             
@@ -374,11 +369,9 @@ public class PassengerController {
                 }
             }
             
-            System.out.println("Flights loaded succesfully.");
             return new Response("Flights loaded succesfully.", Status.OK, flightsCopy);
             
         } catch (Exception ex) {
-            System.out.println("Unexpected error.");
             return new Response("Unexpected error.", Status.INTERNAL_SERVER_ERROR);
         }
     }
