@@ -4,15 +4,14 @@
  */
 package core.models.planes;
 
-import core.models.planes.Plane;
-
 /**
  *
  * @author luchitojunior4
  */
-public class PassengerPlane extends Plane {
+public class PassengerPlane extends Plane implements PassengerTransportable {
     
     private int maxCapacity;
+    private boolean entertaimentOn;
     
     public PassengerPlane(String id, String brand, String model,
             String airline, int maxCapacity
@@ -32,8 +31,22 @@ public class PassengerPlane extends Plane {
     }
 
     @Override
-    public int getMaxCapacity() {
+    public int getCapacity() {
         return this.maxCapacity;
+    }
+
+    @Override
+    public void turnEntertaimentOn() {
+        this.entertaimentOn = true;
+    }
+
+    @Override
+    public void turnEntertaimentOff() {
+        this.entertaimentOn = false;
+    }
+    
+    public boolean isEntertaimentOn() {
+        return this.entertaimentOn;
     }
     
 }

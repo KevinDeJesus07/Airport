@@ -5,6 +5,7 @@
 package core.models.services;
 
 import java.time.LocalDate;
+import java.time.Period;
 
 /**
  *
@@ -13,15 +14,15 @@ import java.time.LocalDate;
 public class PassengerService {
     
     public int calculateAge(LocalDate birthDate) {
-        return 0;
+        return Period.between(birthDate, LocalDate.now()).getYears();
     }
     
     public String generateFullPhone(int countryCode, long phone) {
-        return null;
+        return "+" + countryCode + " " + phone;
     }
     
     public String getFullname(String firstname, String lastname) {
-        return null;
+        return firstname + " " + lastname;
     }
     
 }

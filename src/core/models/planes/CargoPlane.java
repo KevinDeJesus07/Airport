@@ -4,18 +4,17 @@
  */
 package core.models.planes;
 
-import core.models.planes.Plane;
-
 /**
  *
  * @author luchitojunior4
  */
-public class CargoPlane extends Plane {
+public class CargoPlane extends Plane implements CargoTransportable {
     
-    private double maxWeight;
+    private int maxWeight;
+    private boolean rampDeployed;
 
     public CargoPlane(String id, String brand, String model, String airline,
-            double maxWeight
+            int maxWeight
     ) {
         super(id, brand, model, airline);
         this.maxWeight = maxWeight;
@@ -32,8 +31,22 @@ public class CargoPlane extends Plane {
     }
 
     @Override
-    public int getMaxCapacity() {
-        return 0;
+    public int getCapacity() {
+        return maxWeight;
+    }
+
+    @Override
+    public void deployRamp() {
+        this.rampDeployed = true;
+    }
+
+    @Override
+    public void retractRamp() {
+        this.rampDeployed = false;
+    }
+    
+    public boolean isRampDeployed() {
+        return rampDeployed;
     }
       
 }

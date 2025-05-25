@@ -31,8 +31,6 @@ public abstract class Plane {
     
     public abstract Plane clone();
     
-    public abstract int getMaxCapacity();
-    
     public String getId() {
         return id;
     }
@@ -48,5 +46,7 @@ public abstract class Plane {
     public String getAirline() {
         return airline;
     }
+    
+    public abstract int getCapacity();
     
 }

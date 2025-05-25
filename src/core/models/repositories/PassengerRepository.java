@@ -7,6 +7,8 @@ package core.models.repositories;
 import core.models.Passenger;
 import core.models.storage.Storage;
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -21,27 +23,44 @@ public class PassengerRepository {
     }
     
     public Passenger findById(long passengerId) {
-        return null;
+        return storage.getPassenger("" + passengerId);
     }
     
     public ArrayList<Passenger> findAll() {
-        return null;
+        return new ArrayList<>(storage.getPassengers());
     }
     
     public ArrayList<Passenger> findByFlightId(String flightId) {
-        return null;
+        ArrayList<Long> passengerIds = (ArrayList<Long>) storage.getPassengerIdsForFlight(flightId);
+        if (passengerIds == null || passengerIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return (ArrayList<Passenger>) passengerIds.stream()
+                .map(this::findById)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
     
-    public void save(Passenger passenger) {
-        
+    public boolean save(Passenger passenger) {
+        boolean saved = storage.addPassenger(passenger);
+        return saved;
     }
     
-    public void update(Passenger passenger) {
-        
+    public boolean update(Passenger passenger) {
+        boolean updated = storage.updatePassenger(passenger);
+        return updated;
     }
     
     public void delete(long passengerId) {
-        
+        return;
+    }
+
+    public int countByFlightId(String flightId) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    public boolean linkPassengerToFlight(long passengerId, String flightId) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
     
 }

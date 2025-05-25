@@ -11,6 +11,7 @@ import core.models.repositories.FlightRepository;
 import core.models.repositories.PassengerRepository;
 import core.models.repositories.PlaneRepository;
 import java.util.ArrayList;
+import core.models.storage.Storage;
 
 /**
  *
@@ -18,6 +19,7 @@ import java.util.ArrayList;
  */
 public class BookingService {
     
+    private Storage storage;
     private FlightRepository flightRepository;
     private PassengerRepository passengerRepository;
     private PlaneRepository planeRepository;
@@ -42,7 +44,7 @@ public class BookingService {
         }
         
         int currPassengers = passengerRepository.countByFlightId(flightId);
-        int capacity = plane.getMaxCapacity();
+        int capacity = plane.getCapacity();
         
         if (currPassengers >= capacity) {
             return false;
@@ -77,6 +79,11 @@ public class BookingService {
         flightRepository.update(flight);
         
         return true;
+    }
+    
+    public int countByFlightId(String flightId) {
+        ArrayList<Long> passengersIds = (ArrayList<Long>) storage.getPassengerIdsForFlight(flightId);
+        return passengersIds != null ? passengersIds.size() : 0;
     }
     
 }
