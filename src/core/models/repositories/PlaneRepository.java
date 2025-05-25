@@ -7,6 +7,7 @@ package core.models.repositories;
 import core.models.planes.Plane;
 import core.models.storage.Storage;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -21,19 +22,21 @@ public class PlaneRepository {
     }
     
     public Plane findById(String planeId) {
-        return null;
+        return storage.getPlane(planeId);
     }
     
     public ArrayList<Plane> findAll() {
-        return null;
+        return new ArrayList<>(storage.getPlanes());
     }
     
     public ArrayList<Plane> findByAirline(String airline) {
-        return null;
+        return (ArrayList<Plane>) storage.getPlanes().stream()
+                .filter(p -> p != null && airline.equals(p.getAirline()))
+                .collect(Collectors.toList());
     }
     
-    public void save(Plane plane) {
-        
+    public boolean save(Plane plane) {
+        return storage.addPlane(plane);
     }
     
     public void update(Plane plane) {

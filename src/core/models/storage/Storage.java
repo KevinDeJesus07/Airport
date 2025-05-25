@@ -167,7 +167,7 @@ public class Storage {
             return false;
         }
         for (Passenger p : this.passengers) {
-            if (p != null && p.getId() == passenger.getId()) {
+            if (p != null && p.getId() == (passenger.getId())) {
                 return false;
             }
         }
@@ -283,14 +283,14 @@ public class Storage {
         return sortedPlanes;
     }
 
-    public void addBookinfLink(String flightId, long passengerId) {
+    public void addBookingLink(String flightId, long passengerId) {
         for (BookingLink link : bookingLinks) {
             if (link.getFlightId().equals(flightId) && link.getPassengerId() == passengerId) {
                 return;
             }
         }
         this.bookingLinks.add(new BookingLink(flightId, passengerId));
-        notifyListeners(DataType.ALL);
+        notifyListeners(DataType.FLIGHT);
     }
 
     public List<String> getFlightIdsForPassenger(long passengerId) {
@@ -320,6 +320,10 @@ public class Storage {
     public void removeSpecificBookingLink(String flightId, long passengerId) {
         this.bookingLinks.removeIf(link -> flightId.equals(link.getFlightId()) && link.getPassengerId() == passengerId);
         notifyListeners(DataType.ALL);
+    }
+    
+    public ArrayList<Plane> getPlanes() {
+        return this.planes;
     }
 
 }

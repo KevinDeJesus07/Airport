@@ -51,7 +51,7 @@ public class BookingService {
         }
         
         boolean success = passengerRepository.linkPassengerToFlight(passengerId, flightId);
-        
+         
         if (success) {
             // Observer
         }

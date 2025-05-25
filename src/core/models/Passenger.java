@@ -97,8 +97,4 @@ public class Passenger {
         this.country = country;
     }
     
-    public String getFullname() {
-        return firstname + " " + lastname;
-    }
-    
 }

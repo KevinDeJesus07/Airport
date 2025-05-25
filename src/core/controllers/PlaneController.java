@@ -6,7 +6,9 @@ package core.controllers;
 
 import core.controllers.utils.Response;
 import core.controllers.utils.Status;
+import core.models.planes.PassengerPlane;
 import core.models.planes.Plane;
+import core.models.repositories.PlaneRepository;
 import core.models.storage.Storage;
 import java.util.ArrayList;
 
@@ -15,6 +17,8 @@ import java.util.ArrayList;
  * @author Kevin
  */
 public class PlaneController {
+    
+    private static PlaneRepository planeRepository = new PlaneRepository(Storage.getInstance());
 
     public static Response createPlane(
             String planeId,
@@ -63,8 +67,8 @@ public class PlaneController {
             if (airline == null || airline.trim().isEmpty()) {
                 return new Response("Airline must be not empty.", Status.BAD_REQUEST);
             }
-            
-            if (!Storage.getInstance().addPlane(new Plane(planeId, brand, model, maxCapacityInt, airline))) {
+            Plane newPlane = new PassengerPlane(planeId, brand, model, airline, maxCapacityInt);
+            if (!planeRepository.save(newPlane)) {
                 return new Response("Plane with that id already exist.", Status.BAD_REQUEST);
             }
             

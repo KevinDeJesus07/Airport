@@ -8,16 +8,20 @@ import core.controllers.utils.Response;
 import core.controllers.utils.Status;
 import core.models.flights.Flight;
 import core.models.Passenger;
+import core.models.repositories.FlightRepository;
 import core.models.storage.Storage;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  *
  * @author Kevin
  */
 public class PassengerController {
+
+    private static FlightRepository flightRepository = new FlightRepository(Storage.getInstance());
 
     public static Response createPassenger(
             String passengerId,
@@ -162,7 +166,17 @@ public class PassengerController {
 
             }
 
-            if (!Storage.getInstance().addPassenger(Storage.getInstance().getPassenger(passengerId))) {
+            Passenger newPassenger = new Passenger(
+                    passengerIdLong,
+                    firsname,
+                    lastname,
+                    LocalDate.of(yearInt, monthInt, dayInt),
+                    phoneCodeInt,
+                    phoneLong,
+                    country
+            );
+
+            if (!Storage.getInstance().addPassenger(newPassenger)) {
                 return new Response("Passenger with that id alredy exist.", Status.BAD_REQUEST);
             }
 
@@ -297,7 +311,7 @@ public class PassengerController {
                 return new Response("Phone must have a maiximum of 11 digits.", Status.BAD_REQUEST);
             }
             try {
-                phoneLong = Integer.parseInt(phone.trim());
+                phoneLong = Long.parseLong(phone.trim());
                 if (phoneLong < 0) {
                     return new Response("Phone must be positive.", Status.BAD_REQUEST);
                 }
@@ -333,7 +347,7 @@ public class PassengerController {
             return new Response("Unexpected error.", Status.INTERNAL_SERVER_ERROR);
         }
     }
-    
+
     public static Response showMyFlights(String passengerId) {
         try {
             long passengerIdLong;
@@ -354,10 +368,10 @@ public class PassengerController {
             if (Storage.getInstance().getPassenger(passengerId) == null) {
                 return new Response("Passenger id not exist.", Status.BAD_REQUEST);
             }
-            
-            ArrayList<Flight> flights = Storage.getInstance().getPassengerFlights(Storage.getInstance().getPassenger(passengerId));
+
+            ArrayList<Flight> flights = flightRepository.findByPassengerId(passengerIdLong);
             flights.sort(Comparator.comparing(Flight::getDepartureDate));
-            
+
             ArrayList<Flight> flightsCopy = new ArrayList<>();
             if (flights != null) {
                 for (Flight flight : flights) {
@@ -368,13 +382,14 @@ public class PassengerController {
                     }
                 }
             }
-            
+
             return new Response("Flights loaded succesfully.", Status.OK, flightsCopy);
-            
+
         } catch (Exception ex) {
             return new Response("Unexpected error.", Status.INTERNAL_SERVER_ERROR);
         }
     }
+
     public static Response getSortedPassengers() {
         try {
             ArrayList<Passenger> passengers = Storage.getInstance().getSortedPassengers();

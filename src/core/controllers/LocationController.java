@@ -95,7 +95,7 @@ public class LocationController {
             }
 
             if (!Storage.getInstance().addLocation(new Location(
-                    city, name, city,
+                    locationId, name, city,
                     country, latitudeDouble,
                     longitudeDouble))) {
                 return new Response("Airport with that id already exist.", Status.BAD_REQUEST);

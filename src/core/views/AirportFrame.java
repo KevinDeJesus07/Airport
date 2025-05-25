@@ -15,9 +15,11 @@ import core.controllers.PassengerController;
 import core.controllers.PlaneController;
 import core.controllers.utils.Response;
 import core.controllers.utils.Status;
+import core.models.repositories.FlightRepository;
+import core.models.repositories.PassengerRepository;
+import core.models.services.PassengerService;
 import core.models.storage.Storage;
 import java.awt.Color;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
@@ -45,6 +47,9 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
     private ArrayList<Plane> planes;
     private ArrayList<Location> locations;
     private ArrayList<Flight> flights;
+    private PassengerRepository passengerRepository = new PassengerRepository(Storage.getInstance());
+    private FlightRepository flightRepository = new FlightRepository(Storage.getInstance());
+    private PassengerService passengerService = new PassengerService();
 
     public AirportFrame() {
         initComponents();
@@ -62,10 +67,9 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
 
         this.setBackground(new Color(0, 0, 0, 0));
         this.setLocationRelativeTo(null);
-        
-        
+
         if (userSelect != null) {
-            userSelect.addItemListener(new ItemListener(){
+            userSelect.addItemListener(new ItemListener() {
                 @Override
                 public void itemStateChanged(ItemEvent evt) {
                     if (evt.getStateChange() == ItemEvent.SELECTED) {
@@ -74,9 +78,6 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
                 }
             });
         }
-        
-        
-    
 
         this.generateMonths();
         this.generateDays();
@@ -140,6 +141,7 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
         }
 
         populateFlightComboBox(flights);
+        populateFlightAddComboBox(flights);
         refreshAllFlightsTable(flights);
         refreshMyFlightsTable();
     }
@@ -176,6 +178,40 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
         } else {
             if (idDelayComboBox.getItemCount() > 0) {
                 idDelayComboBox.setSelectedIndex(0);
+            }
+        }
+    }
+
+    private void populateFlightAddComboBox(List<Flight> flightList) {
+        if (flightAddComboBox == null) {
+            return;
+        }
+
+        Object select = flightAddComboBox.getSelectedItem();
+        String st = null;
+        if (select != null) {
+            st = select.toString();
+        }
+
+        flightAddComboBox.removeAllItems();
+        flightAddComboBox.addItem("ID");
+
+        for (Flight f : flightList) {
+            if (f != null) {
+                flightAddComboBox.addItem(f.getId());
+            }
+        }
+
+        if (st != null) {
+            flightAddComboBox.setSelectedItem(st);
+            if (flightAddComboBox.getSelectedIndex() <= 0 && !st.equals("ID") && flightAddComboBox.getItemCount() > 1) {
+                flightAddComboBox.setSelectedIndex(0);
+            } else if (flightAddComboBox.getSelectedIndex() == -1 && flightAddComboBox.getItemCount() > 0) {
+                flightAddComboBox.setSelectedIndex(0);
+            }
+        } else {
+            if (flightAddComboBox.getItemCount() > 0) {
+                flightAddComboBox.setSelectedIndex(0);
             }
         }
     }
@@ -245,7 +281,7 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
                         (f.getDepartureDate() != null) ? f.getDepartureDate() : "",
                         (f.calculateArrivalDate() != null) ? f.calculateArrivalDate() : "",
                         (f.getPlane() != null && f.getPlane().getId() != null) ? f.getPlane().getId() : "",
-                        f.getNumPassengers()
+                        (this.passengerRepository != null) ? this.passengerRepository.countByFlightId(f.getId()) : 0
                     });
                 }
             }
@@ -336,9 +372,9 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
                         p.getId(),
                         p.getBrand(),
                         p.getModel(),
-                        p.getMaxCapacity(),
+                        p.getCapacity(),
                         p.getAirline(),
-                        p.getNumFlights()
+                        (this.flightRepository != null) ? this.flightRepository.findByPlaneId(p.getId()).size() : 0
                     });
                 }
             }
@@ -417,12 +453,12 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
                 if (p != null) {
                     model.addRow(new Object[]{
                         p.getId(),
-                        p.getFullname(),
+                        (this.passengerService != null) ? this.passengerService.getFullname(p.getFirstname(), p.getLastname()) : "",
                         (p.getBirthDate() != null) ? p.getBirthDate() : "",
-                        p.calculateAge(),
-                        p.generateFullPhone(),
+                        (this.passengerService != null && p.getBirthDate() != null) ? this.passengerService.calculateAge(p.getBirthDate()) : 0,
+                        (this.passengerService != null) ? this.passengerService.generateFullPhone(p.getCountryPhoneCode(), p.getPhone()) : "",
                         p.getCountry(),
-                        p.getNumFlights()
+                        (this.flightRepository != null) ? this.flightRepository.findByPassengerId(p.getId()).size() : 0
                     });
                 }
             }
@@ -1075,6 +1111,11 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
 
         departureLocationFlightComboBox.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         departureLocationFlightComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Location" }));
+        departureLocationFlightComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                departureLocationFlightComboBoxActionPerformed(evt);
+            }
+        });
 
         jLabel24.setFont(new java.awt.Font("Yu Gothic UI", 0, 18)); // NOI18N
         jLabel24.setText("Departure location:");
@@ -2046,10 +2087,12 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
             countryLocationTextField.setText("");
             latitudeLocationTextField.setText("");
             longitudeLocationTextField.setText("");
-
+            /*
             this.departureLocationFlightComboBox.addItem(id);
             this.arrivalLocationFlightComboBox.addItem(id);
             this.scaleLocationFlightComboBox.addItem(id);
+             */
+            refreshLocationUIComponents();
         }
 
     }//GEN-LAST:event_createLocationButtonActionPerformed
@@ -2257,17 +2300,18 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
 
             DefaultTableModel model = (DefaultTableModel) allPassengersTable.getModel();
             model.setRowCount(0);
-            for (Passenger passenger : passengers) {
-                model.addRow(new Object[]{
-                    passenger.getId(),
-                    passenger.getFullname(),
-                    passenger.getBirthDate(),
-                    passenger.calculateAge(),
-                    passenger.generateFullPhone(),
-                    passenger.getCountry(),
-                    passenger.getNumFlights()
-                });
-                System.out.println(passenger.getNumFlights());
+            for (Passenger p : passengers) {
+                if (p != null) {
+                    model.addRow(new Object[]{
+                        p.getId(),
+                        (this.passengerService != null) ? this.passengerService.getFullname(p.getFirstname(), p.getLastname()) : "",
+                        (p.getBirthDate() != null) ? p.getBirthDate() : "",
+                        (this.passengerService != null && p.getBirthDate() != null) ? this.passengerService.calculateAge(p.getBirthDate()) : 0,
+                        (this.passengerService != null) ? this.passengerService.generateFullPhone(p.getCountryPhoneCode(), p.getPhone()) : "",
+                        p.getCountry(),
+                        (this.flightRepository != null) ? this.flightRepository.findByPassengerId(p.getId()).size() : 0
+                    });
+                }
             }
         }
     }//GEN-LAST:event_refreshAllPassengersButtonActionPerformed
@@ -2283,20 +2327,7 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
         } else {
             ArrayList<Flight> flights = (ArrayList<Flight>) response.getObject();
 
-            DefaultTableModel model = (DefaultTableModel) allFlightsTable.getModel();
-            model.setRowCount(0);
-            for (Flight flight : flights) {
-                model.addRow(new Object[]{
-                    flight.getId(),
-                    flight.getDepartureLocation().getAirportId(),
-                    flight.getArrivalLocation().getAirportId(),
-                    (flight.getScaleLocation() == null ? "-" : flight.getScaleLocation().getAirportId()),
-                    flight.getDepartureDate(),
-                    flight.calculateArrivalDate(),
-                    flight.getPlane().getId(),
-                    flight.getNumPassengers()
-                });
-            }
+            refreshAllFlightsTable(flights);
         }
     }//GEN-LAST:event_refreshAllFlightsButtonActionPerformed
 
@@ -2311,18 +2342,7 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
         } else {
             ArrayList<Plane> planes = (ArrayList<Plane>) response.getObject();
 
-            DefaultTableModel model = (DefaultTableModel) allPlanesTable.getModel();
-            model.setRowCount(0);
-            for (Plane plane : planes) {
-                model.addRow(new Object[]{
-                    plane.getId(),
-                    plane.getBrand(),
-                    plane.getModel(),
-                    plane.getMaxCapacity(),
-                    plane.getAirline(),
-                    plane.getNumFlights()
-                });
-            }
+            refreshPlaneTable(planes);
         }
     }//GEN-LAST:event_refreshAllPlanesButtonActionPerformed
 
@@ -2336,16 +2356,7 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
             JOptionPane.showMessageDialog(null, response.getMessage(), "Error " + response.getStatus(), JOptionPane.WARNING_MESSAGE);
         } else {
             ArrayList<Location> locations = (ArrayList<Location>) response.getObject();
-            DefaultTableModel model = (DefaultTableModel) allLocationsTable.getModel();
-            model.setRowCount(0);
-            for (Location location : locations) {
-                model.addRow(new Object[]{
-                    location.getAirportId(),
-                    location.getAirportName(),
-                    location.getAirportCity(),
-                    location.getAirportCountry()
-                });
-            }
+            refreshLocationTable(locations);
         }
     }//GEN-LAST:event_refreshAllLocationsButtonActionPerformed
 
@@ -2390,6 +2401,10 @@ public class AirportFrame extends javax.swing.JFrame implements EventListeners {
     private void idUpdateTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_idUpdateTextFieldActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_idUpdateTextFieldActionPerformed
+
+    private void departureLocationFlightComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_departureLocationFlightComboBoxActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_departureLocationFlightComboBoxActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTabbedPane TabbedPane;

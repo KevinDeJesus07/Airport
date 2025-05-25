@@ -56,11 +56,17 @@ public class PassengerRepository {
     }
 
     public int countByFlightId(String flightId) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        ArrayList<Long> ids = (ArrayList<Long>) storage.getPassengerIdsForFlight(flightId);
+        return ids == null ? 0 : ids.size();
     }
 
     public boolean linkPassengerToFlight(long passengerId, String flightId) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        Passenger passenger = findById(passengerId);
+        if (passenger == null || storage.getFlight(flightId) == null) {
+            return false;
+        }
+        storage.addBookingLink(flightId, passengerId);
+        return true;
     }
     
 }

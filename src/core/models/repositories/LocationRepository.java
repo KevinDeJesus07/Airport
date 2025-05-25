@@ -21,23 +21,23 @@ public class LocationRepository {
     }
     
     public Location findById(String airportId) {
-        return null;
+        return storage.getLocation(airportId);
     }
     
     public ArrayList<Location> findAll() {
-        return new ArrayList<Location>();
+        return new ArrayList<>(storage.getLocations());
     }
     
-    public void save(Location location) {
-        
+    public boolean save(Location location) {
+        return storage.addLocation(location);
     }
     
     public void update(Location location) {
-        
+        //return storage.updateLocation(location);
     }
     
     public void delete(String airportId) {
-        
+        //return storage.delLocation(airportId);
     }
     
 }
