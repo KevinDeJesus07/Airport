@@ -6,7 +6,12 @@ package core.controllers;
 
 import core.controllers.utils.Response;
 import core.controllers.utils.Status;
-import core.models.Flight;
+import core.models.flights.Flight;
+import core.models.repositories.FlightRepository;
+import core.models.repositories.PassengerRepository;
+import core.models.repositories.PlaneRepository;
+import core.models.services.BookingService;
+import core.models.services.FlightService;
 import core.models.storage.Storage;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -16,6 +21,12 @@ import java.util.ArrayList;
  * @author Kevin
  */
 public class FlightController {
+
+    private static FlightRepository flightRepository = new FlightRepository(Storage.getInstance());
+    private static PassengerRepository passengerRepository = new PassengerRepository(Storage.getInstance());
+    private static PlaneRepository planeRepository = new PlaneRepository(Storage.getInstance());
+    private static BookingService bookingService = new BookingService(flightRepository, passengerRepository, planeRepository);
+    private static FlightService flightService = new FlightService(flightRepository);
 
     public static Response createFlight(String id, String planeId,
             String departureLocationId, String arrivalLocationId,
@@ -151,7 +162,13 @@ public class FlightController {
             departureDate = LocalDateTime.of(departureYearInt, departureMonthInt, departureDayInt, departureHourInt, departureMinutesInt);
 
             // Válidar scaleLocationId
-            boolean hasScale = !(scaleLocationId == null || scaleLocationId.trim().isEmpty());
+            boolean hasScale = scaleLocationId != null
+                    && !scaleLocationId.trim().isEmpty()
+                    && !scaleLocationId.equals("Location")
+                    && scaleHour != null
+                    && !scaleHour.equals("Hour")
+                    && scaleMinutes != null
+                    && !scaleMinutes.equals("Minute");
             if (hasScale) {
                 // Válidar scaleHour
                 if (scaleHour == null || scaleHour.trim().isEmpty()) {
@@ -174,7 +191,7 @@ public class FlightController {
                 } catch (NumberFormatException ex) {
                     return new Response("Scale minutes must be a number.", Status.BAD_REQUEST);
                 }
-                
+
                 if (arrivalHourInt <= 0 && arrivalMinutesInt <= 0 && scaleHourInt <= 0 && scaleMinutesInt <= 0) {
                     return new Response("Flight time must be largest that 0.", Status.BAD_REQUEST);
                 }
@@ -196,11 +213,11 @@ public class FlightController {
                 }
                 return new Response("Flight created succesfully.", Status.CREATED);
             }
-            
+
             if (arrivalHourInt <= 0 && arrivalMinutesInt <= 0) {
                 return new Response("Flight time must be largest that 0.", Status.BAD_REQUEST);
             }
-            
+
             Flight flight = new Flight(
                     id,
                     Storage.getInstance().getPlane(planeId),
@@ -224,7 +241,7 @@ public class FlightController {
         try {
             long passengerIdLong;
             int flightIdInt;
-            
+
             // Válidar passengerId
             if (passengerId == null || passengerId.trim().isEmpty()) {
                 return new Response("Passenger id must be not empty.", Status.BAD_REQUEST);
@@ -240,46 +257,45 @@ public class FlightController {
             if (passengerId.trim().length() > 15) {
                 return new Response("Passenger id must have a maximum of 15 digits.", Status.BAD_REQUEST);
             }
-            if (Storage.getInstance().getPassenger(passengerId) != null) {
-                return new Response("Passenger id must be unique.", Status.BAD_REQUEST);
+            if (Storage.getInstance().getPassenger(passengerId) == null) {
+                return new Response("Passenger id does not exist.", Status.BAD_REQUEST);
             }
-            
+
             // Válidar flightId
             if (flightId == null || flightId.trim().isEmpty()) {
                 return new Response("Flight id must be not empty.", Status.BAD_REQUEST);
             }
-            try {
-                flightIdInt = Integer.parseInt(flightId.trim());
-            } catch (NumberFormatException ex) {
-                return new Response("Flight id must be a number.", Status.BAD_REQUEST);
+            if (!flightId.matches("^[A-Z]{3}\\d{3}$")) {
+                return new Response("Id must be a valid format: XXXYYY (e.g: ABC123).", Status.BAD_REQUEST);
             }
-            
-            Storage.getInstance().getPassenger(passengerId).addFlight(Storage.getInstance().getFlight(flightId));
-            Storage.getInstance().getFlight(flightId).addPassenger(Storage.getInstance().getPassenger(passengerId));
-            
+
+            boolean success = bookingService.addPassengerToFlight(passengerIdLong, flightId);
+
+            if (!success) {
+                return new Response("Passenger not added to flight.", Status.INTERNAL_SERVER_ERROR);
+            }
+
             return new Response("Passenger added succesfully to the flight.", Status.OK);
-            
+
         } catch (Exception ex) {
             return new Response("Unexpected error.", Status.INTERNAL_SERVER_ERROR);
         }
     }
-    
+
     public static Response delayFlight(String flightId, String hours, String minutes) {
         try {
-            int flightIdInt;
+
             int hoursInt;
             int minutesInt;
-            
+
             // Válidar flightId
             if (flightId == null || flightId.trim().isEmpty()) {
                 return new Response("Flight id must be not empty.", Status.BAD_REQUEST);
             }
-            try {
-                flightIdInt = Integer.parseInt(flightId.trim());
-            } catch (NumberFormatException ex) {
-                return new Response("Flight id must be a number.", Status.BAD_REQUEST);
+            if (!flightId.trim().matches("^[A-Z]{3}\\d{3}$")) {
+                return new Response("Flight id must be in the format: 3 uppercase letters followed by 3 digits (e.g. ABC123).", Status.BAD_REQUEST);
             }
-            
+
             // Válidar hours
             if (hours == null || hours.trim().isEmpty()) {
                 return new Response("Hours must be not empty.", Status.BAD_REQUEST);
@@ -289,7 +305,7 @@ public class FlightController {
             } catch (Exception ex) {
                 return new Response("Hours must be a number.", Status.BAD_REQUEST);
             }
-            
+
             // Válidar minutes
             if (minutes == null || minutes.trim().isEmpty()) {
                 return new Response("Minutes must be not empty.", Status.BAD_REQUEST);
@@ -299,18 +315,20 @@ public class FlightController {
             } catch (Exception ex) {
                 return new Response("Minutes must be a number.", Status.BAD_REQUEST);
             }
-            
+
             if (hoursInt <= 0 && minutesInt <= 0) {
                 return new Response("Delay time must be a longest that 00:00.", Status.BAD_REQUEST);
             }
-            
-            Storage.getInstance().getFlight(flightId).delay(hoursInt, minutesInt);
+
+            flightService.delayFlight(flightId, hoursInt, minutesInt);
+
             return new Response("Delay apply succesfully.", Status.OK);
         } catch (Exception ex) {
+            ex.printStackTrace();
             return new Response("Unexpected error.", Status.INTERNAL_SERVER_ERROR);
         }
     }
-    
+
     public static Response getSortedFlights() {
         try {
             ArrayList<Flight> flights = Storage.getInstance().getSortedFlights();

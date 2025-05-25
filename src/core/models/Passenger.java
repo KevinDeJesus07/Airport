@@ -6,7 +6,6 @@ package core.models;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.ArrayList;
 
 /**
  *
@@ -21,7 +20,6 @@ public class Passenger {
     private int countryPhoneCode;
     private long phone;
     private String country;
-    private ArrayList<Flight> flights;
 
     public Passenger(long id, String firstname, String lastname, LocalDate birthDate, int countryPhoneCode, long phone, String country) {
         this.id = id;
@@ -31,7 +29,6 @@ public class Passenger {
         this.countryPhoneCode = countryPhoneCode;
         this.phone = phone;
         this.country = country;
-        this.flights = new ArrayList<>();
     }
     
     public Passenger(Passenger passenger) {
@@ -42,25 +39,10 @@ public class Passenger {
         this.countryPhoneCode = passenger.countryPhoneCode;
         this.phone = passenger.phone;
         this.country = passenger.country;
-        
-        this.flights = new ArrayList<>();
-        if (passenger.flights != null) {
-            for (Flight flight : passenger.flights) {
-                if (flight != null) {
-                    this.flights.add(flight.clone());
-                } else {
-                    this.flights.add(null);
-                }
-            }
-        }
     }
     
     public Passenger clone() {
         return new Passenger(this);
-    }
-
-    public void addFlight(Flight flight) {
-        this.flights.add(flight);
     }
     
     public long getId() {
@@ -91,10 +73,6 @@ public class Passenger {
         return country;
     }
 
-    public ArrayList<Flight> getFlights() {
-        return flights;
-    }
-
     public void setFirstname(String firstname) {
         this.firstname = firstname;
     }
@@ -117,22 +95,6 @@ public class Passenger {
 
     public void setCountry(String country) {
         this.country = country;
-    }
-    
-    public String getFullname() {
-        return firstname + " " + lastname;
-    }
-    
-    public String generateFullPhone() {
-        return "+" + countryPhoneCode + " " + phone;
-    }
-    
-    public int calculateAge() {
-        return Period.between(birthDate, LocalDate.now()).getYears();
-    }
-    
-    public int getNumFlights() {
-        return flights.size();
     }
     
 }

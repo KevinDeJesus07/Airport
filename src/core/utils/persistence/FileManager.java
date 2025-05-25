@@ -4,10 +4,11 @@
  */
 package core.utils.persistence;
 
-import core.models.Flight;
+import core.models.flights.Flight;
 import core.models.Location;
 import core.models.Passenger;
-import core.models.Plane;
+import core.models.planes.PassengerPlane;
+import core.models.planes.Plane;
 import core.models.storage.Storage;
 import core.utils.events.DataType;
 import java.io.IOException;
@@ -35,9 +36,9 @@ public class FileManager {
     private static Map<Long, Passenger> loadedPassengersMap = new HashMap<>();
 
     private FileManager() {
-        
+
     }
-    
+
     private static String readFileAsString(String filePath) throws IOException {
         return new String(Files.readAllBytes(Paths.get(filePath)), StandardCharsets.UTF_8);
     }
@@ -51,12 +52,12 @@ public class FileManager {
         loadedLocationsMap.clear();
         loadedPlanesMap.clear();
         loadedPassengersMap.clear();
-        
+
         loadLocations(locationsFilePath);
         loadPlanes(planesFilePath);
         loadPassengers(passengersFilePath);
         loadFlights(flightsFilePath);
-        
+
         linkFlights();
         Storage.getInstance().notifyListeners(DataType.ALL);
     }
@@ -108,9 +109,9 @@ public class FileManager {
                 int maxCapacity = planeJson.getInt("maxCapacity");
                 String airline = planeJson.getString("airline");
 
-                Plane plane = new Plane(
+                Plane plane = new PassengerPlane(
                         id, brand, model,
-                        maxCapacity, airline
+                        airline, maxCapacity
                 );
 
                 loadedPlanesMap.put(plane.getId(), plane);
@@ -156,23 +157,22 @@ public class FileManager {
             ex.printStackTrace();
         }
     }
-    
+
     private static void linkFlights() {
         List<Passenger> passengers = Storage.getInstance().getPassengers();
         List<Flight> flights = Storage.getInstance().getFlights();
-        
+
         if (passengers.isEmpty() || flights.isEmpty()) {
             return;
         }
-        
+
         int links = 0;
         for (int i = 0; i < Math.min(passengers.size(), flights.size()); i++) {
             Passenger p = passengers.get(i);
             Flight f = flights.get(i);
-            
+
             if (p != null && f != null) {
-                p.addFlight(f);
-                f.addPassenger(p);
+                Storage.getInstance().addBookingLink(f.getId(), p.getId());
                 links++;
             }
         }
@@ -238,6 +238,12 @@ public class FileManager {
                     flight = new Flight(flightId, plane, departureLocation, arrivalLocation,
                             departureDateTime, durArrH, durArrM);
                 }
+                
+                boolean success = Storage.getInstance().addFlight(flight);
+                
+                if (!success) {
+                    return;
+                }
 
                 if (flightJson.has("passengerIdsOnFlight")) {
                     JSONArray passIdsArray = flightJson.getJSONArray("passengerIdsOnFlight");
@@ -245,8 +251,7 @@ public class FileManager {
                         long passengerId = passIdsArray.getLong(j);
                         Passenger passenger = loadedPassengersMap.get(passengerId);
                         if (passenger != null) {
-                            flight.addPassenger(passenger);
-                            passenger.addFlight(flight);
+                            Storage.getInstance().addBookingLink(flight.getId(), passengerId);
                         } else {
                             System.err.println("  Advertencia: Pasajero con ID " + passengerId + " no encontrado para el vuelo '" + flightId + "'.");
                         }
