@@ -4,10 +4,11 @@
  */
 package core.models.storage;
 
-import core.models.Flight;
+import core.models.BookingLink;
+import core.models.flights.Flight;
 import core.models.Location;
 import core.models.Passenger;
-import core.models.Plane;
+import core.models.planes.Plane;
 import core.utils.events.DataType;
 import core.utils.events.EventListeners;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.EnumMap;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -28,6 +30,7 @@ public class Storage {
     private ArrayList<Location> locations;
     private ArrayList<Plane> planes;
     private ArrayList<Passenger> passengers;
+    private ArrayList<BookingLink> bookingLinks;
 
     private Storage() {
         this.flights = new ArrayList<>();
@@ -35,6 +38,7 @@ public class Storage {
         this.planes = new ArrayList<>();
         this.passengers = new ArrayList<>();
         this.listeners = new EnumMap<>(DataType.class);
+        this.bookingLinks = new ArrayList<>();
         for (DataType type : DataType.values()) {
             listeners.put(type, new ArrayList<>());
         }
@@ -99,6 +103,18 @@ public class Storage {
             notifyListeners(DataType.FLIGHT);
         }
         return added;
+    }
+
+    public boolean updateFlight(Flight flight) {
+        for (int i = 0; i < this.flights.size(); i++) {
+            Flight currFlight = this.flights.get(i);
+            if (currFlight.getId().equals(flight.getId())) {
+                this.flights.set(i, flight);
+                notifyListeners(DataType.FLIGHT);
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean delFlight(String id) {
@@ -188,15 +204,6 @@ public class Storage {
         return true;
     }
 
-    public ArrayList<Flight> getPassengerFlights(Passenger passenger) {
-        for (Passenger p : passengers) {
-            if (p != null && p.getId() == passenger.getId()) {
-                return passenger.getFlights();
-            }
-        }
-        return new ArrayList<>();
-    }
-
     public boolean addPlane(Plane plane) {
         if (plane == null || plane.getId() == null) {
             return false;
@@ -275,4 +282,44 @@ public class Storage {
         sortedPlanes.sort(Comparator.comparing(Plane::getId));
         return sortedPlanes;
     }
+
+    public void addBookinfLink(String flightId, long passengerId) {
+        for (BookingLink link : bookingLinks) {
+            if (link.getFlightId().equals(flightId) && link.getPassengerId() == passengerId) {
+                return;
+            }
+        }
+        this.bookingLinks.add(new BookingLink(flightId, passengerId));
+        notifyListeners(DataType.ALL);
+    }
+
+    public List<String> getFlightIdsForPassenger(long passengerId) {
+        return this.bookingLinks.stream()
+                .filter(link -> link.getPassengerId() == passengerId)
+                .map(BookingLink::getFlightId)
+                .collect(Collectors.toList());
+    }
+
+    public List<Long> getPassengerIdsForFlight(String flightId) {
+        return this.bookingLinks.stream()
+                .filter(link -> flightId.equals(link.getFlightId()))
+                .map(BookingLink::getPassengerId)
+                .collect(Collectors.toList());
+    }
+
+    public void removeBookingLinksForFlight(String flightId) {
+        this.bookingLinks.removeIf(link -> flightId.equals(link.getFlightId()));
+        notifyListeners(DataType.ALL);
+    }
+
+    public void removeBookingLinksForPassenger(long passengerId) {
+        this.bookingLinks.removeIf(link -> link.getPassengerId() == passengerId);
+        notifyListeners(DataType.ALL);
+    }
+
+    public void removeSpecificBookingLink(String flightId, long passengerId) {
+        this.bookingLinks.removeIf(link -> flightId.equals(link.getFlightId()) && link.getPassengerId() == passengerId);
+        notifyListeners(DataType.ALL);
+    }
+
 }

@@ -4,10 +4,10 @@
  */
 package core.utils.persistence;
 
-import core.models.Flight;
+import core.models.flights.Flight;
 import core.models.Location;
 import core.models.Passenger;
-import core.models.Plane;
+import core.models.planes.Plane;
 import core.models.storage.Storage;
 import core.utils.events.DataType;
 import java.io.IOException;

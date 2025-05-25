@@ -6,7 +6,7 @@ package core.controllers;
 
 import core.controllers.utils.Response;
 import core.controllers.utils.Status;
-import core.models.Flight;
+import core.models.flights.Flight;
 import core.models.Passenger;
 import core.models.storage.Storage;
 import java.time.LocalDate;
